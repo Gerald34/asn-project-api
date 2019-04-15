@@ -3,7 +3,13 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 
+/**
+ * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static Builder create(array $attributes = [])
+ * @method public Builder update(array $values)
+ */
 class UserLoginModel extends Model
 {
     public $table = "users";
@@ -13,24 +19,14 @@ class UserLoginModel extends Model
      * @var array
      */
     protected $fillable = [
+        'uid',
+        'verification',
+        'disabled',
         'email',
         'password',
         'first_name',
-        'middle_name',
         'last_name',
-        'date_of_birth',
-        'sports',
-        'position',
-        'gender',
-        'team_name',
-        'school_name',
-        'grade',
-        'creation_date',
-        'last_update',
-        'user_type',
-        'student_name',
-        'referee_number',
-        'team'
+        'created_at',
+        'updated_at',
     ];
-
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\FirebaseResource;
 use Illuminate\Http\Request;
 use App\Http\Resources\UserRegistrationResource;
 use Illuminate\Support\Facades\Hash;
@@ -12,30 +13,44 @@ use Illuminate\Support\Facades\Hash;
  */
 class UserRegistrationController extends Controller
 {
+    private $response;
+
     /**
      * @param Request $request
      * @return array
      */
     public function register(Request $request) {
-        $newStudent = [
-            'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password')),
-            'first_name' => $request->input('first_name'),
-            'middle_name' => $request->input('middle_name'),
-            'last_name' => $request->input('last_name'),
-            'date_of_birth' => $request->input('date_of_birth'),
-            'sports' => $request->input('sports'),
-            'position' => $request->input('position'),
-            'gender' => $request->input('gender'),
-            'team_name' => $request->input('team_name'),
-            'school_name' => $request->input('school_name'),
-            'grade' => $request->input('grade'),
-            'user_type' => $request->input('user_type'),
+        $registration = [];
+        if ($request->input('password') === $request->input('confirmPassword')) {
+            $registration = [
+                'email' => $request->input('email'),
+                'password' => Hash::make($request->input('password'))
+            ];
+        } else {
+            $this->response = [
+                'errorCode' => 505,
+                'errorMessage' => 'Passwords do not match...'
+            ];
+        }
 
-        ];
+        $firebase = FirebaseResource::signup($registration);
 
-        $register = UserRegistrationResource::register($newStudent);
+        if (isset($firebase->uid)) {
+            $mysqlDatabaseUsers = [
+                'uid' => $firebase->uid,
+                'email' => $firebase->email,
+                'passwordHash' => $firebase->passwordHash,
+                'verification' => $firebase->emailVerified,
+                'disabled' => $firebase->disabled,
+                'created_at' => $firebase->metadata->createdAt,
+                'first_name' => $request->input('first_name'),
+                'last_name' => $request->input('last_name'),
+            ];
+            $this->response = UserRegistrationResource::register($mysqlDatabaseUsers);
+        } else {
+            $this->response = $firebase;
+        }
 
-        return $register;
+        return $this->response;
     }
 }

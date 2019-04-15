@@ -17,7 +17,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::group(['prefix' => '/users'], function() {
+Route::group(['prefix' => '/app'], function() {
     Route::post('/login', 'UserLoginController@login');
     Route::post('/register', 'UserRegistrationController@register');
     Route::get('getPosts/{id}', 'FeedPostsController@getUserPosts');
