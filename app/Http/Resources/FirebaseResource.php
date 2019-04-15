@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Config;
 use Kreait\Firebase\ServiceAccount;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Exception\Auth\UserNotFound;
@@ -10,25 +11,17 @@ use Kreait\Firebase\Exception\Auth\UserNotFound;
 class FirebaseResource extends JsonResource
 {
     public static $serviceAccount;
-    private static $firebaseUri;
-    private static $response;
-
-    public function __construct($resource)
-    {
-        parent::__construct($resource);
-        self::$serviceAccount = ServiceAccount::fromJsonFile(__DIR__ . '/asn-sports-firebase-adminsdk-hjyvg-f95e677461.json');
-        self::$firebaseUri = 'https://asn-sports.firebaseio.com';
-    }
+    public static $_firebase;
+    public static $firebaseUri;
+    public static $response;
 
     public static function signup($registration) {
-
-        $firebase = (new Factory)
-            ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/asn-sports-firebase-adminsdk-hjyvg-f95e677461.json'))
-            ->withDatabaseUri('https://asn-sports.firebaseio.com')->create();
-
+        self::$_firebase = (new Factory)
+            ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/../../../' . Config::get('constants.firebase')))
+            ->withDatabaseUri(Config::get('constants.firebase_database'))->create();
         // Check if user exists;
         try {
-            $user = $firebase->getAuth()->getUserByEmail($registration['email']);
+            $user = self::$_firebase->getAuth()->getUserByEmail($registration['email']);
         } catch (UserNotFound $e) {
             self::$response = $e->getMessage();
         }
@@ -39,7 +32,7 @@ class FirebaseResource extends JsonResource
                 'errorMessage' => 'User with email: ' . $registration['email'] . ' already exists.'
             ];
         } else {
-            self::$response = $firebase->getAuth()
+            self::$response = self::$_firebase->getAuth()
                 ->createUserWithEmailAndPassword($registration['email'], $registration['password']);
         }
 
@@ -48,11 +41,10 @@ class FirebaseResource extends JsonResource
     }
 
     public static function realtimeDatabase($data) {
-        $firebase = (new Factory)
-            ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/asn-sports-firebase-adminsdk-hjyvg-f95e677461.json'))
-            ->withDatabaseUri('https://asn-sports.firebaseio.com')->create();
-
-        $database = $firebase->getDatabase();
+        self::$_firebase = (new Factory)
+            ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/../../../' . Config::get('constants.firebase')))
+            ->withDatabaseUri(Config::get('constants.firebase_database'))->create();
+        $database = self::$_firebase->getDatabase();
         $database->getReference('users/' . $data->uid)->set(
             [
                 'uid' => $data->uid,
