@@ -163,8 +163,7 @@ class TeamsResource extends JsonResource
         if(isset($searchTeam)) {
             $teamMembers = TeamMembers::select('uid')
                 ->where(['team_id' => $searchTeam->team_id],['active' => 1])->get();
-
-            if(isset($teamMembers)) {
+            if(count($teamMembers) > 0) {
                 $membersInformation = self::_membersInformationByUID($teamMembers);
                 self::$response = [
                     'successCode' => 200,
@@ -177,10 +176,9 @@ class TeamsResource extends JsonResource
                     'successCode' => 200,
                     'successMessage' => 'Team found.',
                     'team' => $searchTeam,
-                    'team_members' => 'You have ' . count($teamMembers) . ' in your team'
+                    'team_members' => 'You have 0 members in your team'
                 ];
             }
-
         } else {
             self::$response = [
                 'errorCode' => 504,
