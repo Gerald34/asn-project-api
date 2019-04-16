@@ -10,23 +10,13 @@ use Illuminate\Database\Query\Builder;
  * @method static Builder create(array $attributes = [])
  * @method public Builder update(array $values)
  */
-class UserLoginModel extends Model
+class MembersModel extends Model
 {
-    public $table = "users";
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
+    public $table = "team_members";
     protected $fillable = [
         'uid',
-        'verification',
-        'disabled',
-        'email',
-        'avatar_path',
-        'password',
-        'first_name',
-        'last_name',
+        'team_id',
+        'active',
         'created_at',
         'updated_at',
     ];

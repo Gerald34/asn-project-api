@@ -5,7 +5,8 @@ namespace App\Http\Resources;
 use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\TeamsModel as Team;
-
+use App\MembersModel as TeamMembers;
+use App\UserLoginModel as Users;
 /**
  * Class TeamsResource
  * @package App\Http\Resources
@@ -84,6 +85,10 @@ class TeamsResource extends JsonResource
         return $create;
     }
 
+    /**
+     * @param $data
+     * @return array
+     */
     public static function editByOwner($data) {
         $ownership = self::_findByOwnership($data['uid']);
         if ($ownership->uid !== $data['uid'] && $ownership->active !== 1) {
@@ -103,12 +108,21 @@ class TeamsResource extends JsonResource
         return self::$response;
     }
 
+    /**
+     * @param $userID
+     * @return mixed
+     */
     private static function _findByOwnership($userID) {
         return Team::select('uid', 'active', 'team_id', 'created_at')
-            ->where('uid', '=', $userID)
-            ->first();
+            ->where('uid', '=', $userID)->first();
     }
 
+    /**
+     * @param $data
+     * @param $slugGenerator
+     * @param $ownership
+     * @return array
+     */
     private static function _editTeam($data, $slugGenerator, $ownership) {
         $updateDetails = [
             'uid' => $ownership->uid,
@@ -147,11 +161,26 @@ class TeamsResource extends JsonResource
         $searchTeam = Team::where('uid', $uid)->first();
 
         if(isset($searchTeam)) {
-            self::$response = [
-                'successCode' => 200,
-                'successMessage' => 'Team found.',
-                'team' => $searchTeam
-            ];
+            $teamMembers = TeamMembers::select('uid')
+                ->where(['team_id' => $searchTeam->team_id],['active' => 1])->get();
+
+            if(isset($teamMembers)) {
+                $membersInformation = self::_membersInformationByUID($teamMembers);
+                self::$response = [
+                    'successCode' => 200,
+                    'successMessage' => 'Team found.',
+                    'team' => $searchTeam,
+                    'team_members' => $membersInformation
+                ];
+            } else {
+                self::$response = [
+                    'successCode' => 200,
+                    'successMessage' => 'Team found.',
+                    'team' => $searchTeam,
+                    'team_members' => 'You have ' . count($teamMembers) . ' in your team'
+                ];
+            }
+
         } else {
             self::$response = [
                 'errorCode' => 504,
@@ -160,6 +189,18 @@ class TeamsResource extends JsonResource
         }
 
         return self::$response;
+    }
+
+    /**
+     * @param $teamMembers
+     * @return mixed
+     */
+    protected static function _membersInformationByUID($teamMembers) {
+        $uids = [];
+        foreach ($teamMembers as $uid) {
+            $uids[] = $uid->uid;
+        }
+        return Users::select('uid', 'avatar_path', 'first_name', 'last_name')->whereIn('uid', $uids)->get();
     }
 
     /**
