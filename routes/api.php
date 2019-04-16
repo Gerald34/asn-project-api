@@ -20,14 +20,24 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::group(['prefix' => '/app'], function() {
     Route::post('/login', 'UserLoginController@login');
     Route::post('/register', 'UserRegistrationController@register');
+});
+
+Route::group(['prefix' => '/user'], function() {
+    // Teams
+    Route::group(['prefix' => '/team'], function() {
+       Route::post('create', 'TeamsController@create');
+       Route::post('get', 'TeamsController@getTeam');
+       Route::post('remove', 'TeamsController@removeExistingTeamByUID');
+       Route::post('edit', 'TeamsController@editTeamByOwnership');
+    });
+
     Route::get('getPosts/{id}', 'FeedPostsController@getUserPosts');
     Route::get('getUserInformation/{id}', 'UserController@getMyInformation');
-    // Upload file
     Route::get('getAvatar/{id}', 'AvatarController@getUserAvatar');
     Route::post('uploadAvatar', 'AvatarController@uploadUserAvatar');
     Route::post('updateProfile', 'UserController@updateProfile');
+    Route::get('/teams/{id}', 'AppController@getAllTeams');
+    Route::get('/activities', 'AppController@activities');
+    Route::get('/activitypositions/{id}', 'AppController@getPositionsByActivity');
 });
 
-Route::get('/teams/{id}', 'AppController@getAllTeams');
-Route::get('/activities', 'AppController@activities');
-Route::get('/activitypositions/{id}', 'AppController@getPositionsByActivity');
