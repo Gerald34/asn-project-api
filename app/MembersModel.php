@@ -13,7 +13,7 @@ use Illuminate\Database\Query\Builder;
 class MembersModel extends Model
 {
     public $table = "team_members";
-    protected $fillable = [
+    public $fillable = [
         'uid',
         'team_id',
         'active',

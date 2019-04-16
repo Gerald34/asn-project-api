@@ -17,7 +17,6 @@ class TeamsController extends Controller
             'team_name' => strip_tags($request->input('team_name')),
             'sports_category' => trim(strip_tags($request->input('sports_category')))
         ];
-
         return TeamsResource::dataCollection($data);
     }
 
@@ -41,7 +40,6 @@ class TeamsController extends Controller
             'team_name' => strip_tags($request->input('team_name')),
             'sports_category' => trim(strip_tags($request->input('sports_category')))
         ];
-
         return TeamsResource::editByOwner($data);
     }
 
@@ -53,6 +51,15 @@ class TeamsController extends Controller
         $uid = $request->input('uid');
         $teamHash = $request->input('teamHash');
         return TeamsResource::findAndRemoveTeamByOwnership($uid, $teamHash);
+    }
+
+    public function joinTeam(Request $request) {
+        $data = [
+            'uid' => trim(strip_tags($request->input('uid'))),
+            'team_id' => trim(strip_tags($request->input('team_id'))),
+        ];
+
+        return TeamsResource::joinSelectedTeam($data);
     }
 }
 

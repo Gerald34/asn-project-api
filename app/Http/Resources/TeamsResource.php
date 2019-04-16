@@ -2,11 +2,13 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\GeneratorResource as Generator;
 use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\TeamsModel as Team;
 use App\MembersModel as TeamMembers;
 use App\UserLoginModel as Users;
+
 /**
  * Class TeamsResource
  * @package App\Http\Resources
@@ -27,33 +29,11 @@ class TeamsResource extends JsonResource
                 'errorMessage' => 'Sorry you cannot create more than 1 team.'
             ];
         } else {
-            $slugGenerator = strtolower(self::_generateSlugFromName($data['team_name']));
-            $teamIdGenerate = self::_generateRandomTeamID(8);
-            self::$response = self::_createTeam($data, $slugGenerator, $teamIdGenerate);
+            $slugFromName = Generator::generateSlugFromName($data['team_name']);
+            $teamIdGenerate = Generator::generateRandomString(8);
+            self::$response = self::_createTeam($data, $slugFromName, $teamIdGenerate);
         }
         return self::$response;
-    }
-
-    /**
-     * @param string $name
-     * @return mixed
-     */
-    private static function _generateSlugFromName(string $name) {
-        return str_replace(' ', '_', $name);
-    }
-
-    /**
-     * @param $length
-     * @return string
-     */
-    private static function _generateRandomTeamID($length) {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
-        }
-        return strtolower($randomString);
     }
 
     /**
@@ -66,23 +46,55 @@ class TeamsResource extends JsonResource
 
     /**
      * @param $data
-     * @param $slugGenerator
+     * @param $slugFromName
      * @param $teamIdGenerate
-     * @return \Illuminate\Database\Query\Builder
+     * @return array
      */
-    private static function _createTeam($data, $slugGenerator, $teamIdGenerate) {
+    private static function _createTeam($data, $slugFromName, $teamIdGenerate) {
         $create = Team::create([
             'uid' => $data['uid'],
             'owner' => $data['uid'],
             'team_id' => $teamIdGenerate,
             'team_name' => $data['team_name'],
-            'team_slug' => $slugGenerator,
+            'team_slug' => $slugFromName,
             'sports_category' => $data['sports_category'],
             'active' => 1,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
-        return $create;
+        $firebaseData = [
+            'uid' => $data['uid'],
+            'owner' => $data['uid'],
+            'team_id' => $teamIdGenerate,
+            'team_name' => $data['team_name'],
+            'team_slug' => $slugFromName,
+            'sports_category' => $data['sports_category'],
+            'active' => 1,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ];
+        FirebaseResource::teams($firebaseData);
+
+        $members = TeamMembers::select('uid')->where(['team_id' => $teamIdGenerate], ['active' => 1])->get();
+
+        if(count($members) > 0) {
+            $membersInformation = self::_membersInformationByUID($members);
+            self::$response = [
+                'successCode' => 200,
+                'successMessage' => 'Team found.',
+                'team' => $create,
+                'team_members' => $membersInformation
+            ];
+        } else {
+            self::$response = [
+                'successCode' => 200,
+                'successMessage' => 'Team found.',
+                'team' => $create,
+                'team_members' => 'You have 0 members in your team'
+            ];
+        }
+
+        return self::$response;
     }
 
     /**
@@ -102,8 +114,8 @@ class TeamsResource extends JsonResource
                 'errorMessage' => 'Team not found.'
             ];
         } else {
-            $slugGenerator = strtolower(self::_generateSlugFromName($data['team_name']));
-            self::$response = self::_editTeam($data, $slugGenerator, $ownership);
+            $slugFromName = Generator::generateSlugFromName($data['team_name']);
+            self::$response = self::_editTeam($data, $slugFromName, $ownership);
         }
         return self::$response;
     }
@@ -119,17 +131,17 @@ class TeamsResource extends JsonResource
 
     /**
      * @param $data
-     * @param $slugGenerator
+     * @param $slugFromName
      * @param $ownership
      * @return array
      */
-    private static function _editTeam($data, $slugGenerator, $ownership) {
+    private static function _editTeam($data, $slugFromName, $ownership) {
         $updateDetails = [
             'uid' => $ownership->uid,
             'owner' => $ownership->uid,
             'team_id' => $ownership->team_id,
             'team_name' => $data['team_name'],
-            'team_slug' => $slugGenerator,
+            'team_slug' => $slugFromName,
             'sports_category' => $data['sports_category'],
             'active' => 1,
             'created_at' => $ownership->created_at,
@@ -139,6 +151,7 @@ class TeamsResource extends JsonResource
             ->update($updateDetails);
 
         if($update === 1) {
+            FirebaseResource::teams($updateDetails);
             self::$response = [
                 'successCode' => 202,
                 'successMessage' => $ownership->team_name . ' is successfully updated.'
@@ -231,6 +244,15 @@ class TeamsResource extends JsonResource
         }
 
         return self::$response;
+    }
+
+    public static function joinSelectedTeam(array $data) {
+        $join = new TeamMembers();
+        $join->uid = $data['uid'];
+        $join->team_id = $data['team_id'];
+        $join->created_at = Carbon::now();
+        $join->updated_at = Carbon::now();
+        $join->save();
     }
 
 }
