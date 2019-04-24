@@ -19,7 +19,8 @@ class FirebaseResource extends JsonResource
      * @param $registration
      * @return array|\Kreait\Firebase\Auth\UserRecord|string
      */
-    public static function signup($registration) {
+    public static function signup($registration)
+    {
         self::$_firebase = (new Factory)
             ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/../../../' . Config::get('constants.firebase')))
             ->withDatabaseUri(Config::get('constants.firebase_database'))->create();
@@ -47,7 +48,8 @@ class FirebaseResource extends JsonResource
     /**
      * @param $data
      */
-    public static function realtimeDatabase($data) {
+    public static function realtimeDatabase($data)
+    {
         self::$_firebase = (new Factory)
             ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/../../../' . Config::get('constants.firebase')))
             ->withDatabaseUri(Config::get('constants.firebase_database'))->create();
@@ -64,7 +66,11 @@ class FirebaseResource extends JsonResource
             ]);
     }
 
-    public static function teams($data) {
+    /**
+     * @param $data
+     */
+    public static function teams($data)
+    {
         self::$_firebase = (new Factory)
             ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/../../../' . Config::get('constants.firebase')))
             ->withDatabaseUri(Config::get('constants.firebase_database'))->create();
@@ -80,6 +86,43 @@ class FirebaseResource extends JsonResource
                 'active' => $data['active'],
                 'created_at' => $data['created_at'],
                 'updated_at' => $data['updated_at']
+            ]);
+    }
+
+    /**
+     * @param $email
+     * @return \Kreait\Firebase\Auth\UserRecord
+     */
+    public static function login($email)
+    {
+        self::$_firebase = (new Factory)
+            ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/../../../' . Config::get('constants.firebase')))
+            ->withDatabaseUri(Config::get('constants.firebase_database'))->create();
+
+        try {
+            self::$response = self::$_firebase->getAuth()->getUserByEmail($email);
+        } catch (UserNotFound $e) {
+            self::$response = $e->getMessage();
+        }
+
+        return self::$response;
+    }
+
+    /**
+     * @param $uid
+     * @param $postID
+     * @param $likeCount
+     */
+    public static function updatePostLikes($uid, $postID, $likeCount)
+    {
+        self::$_firebase = (new Factory)
+            ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/../../../' . Config::get('constants.firebase')))
+            ->withDatabaseUri(Config::get('constants.firebase_database'))->create();
+        $database = self::$_firebase->getDatabase();
+        $database->getReference('posts/' . $postID)->set(
+            [
+                'uid' => $uid,
+                'likeCount' => count($likeCount),
             ]);
     }
 }

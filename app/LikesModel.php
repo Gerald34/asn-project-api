@@ -4,9 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class AvatarModel extends Model
+class LikesModel extends Model
 {
-    public $table = "avatars";
+    public $table = "post_likes";
     /**
      * The attributes that are mass assignable.
      *
@@ -15,9 +15,7 @@ class AvatarModel extends Model
     protected $fillable = [
         'id',
         'uid',
-        'avatar',
-        'created_at',
-        'updated_at'
+        'post_id',
+        'liked_at'
     ];
-
 }

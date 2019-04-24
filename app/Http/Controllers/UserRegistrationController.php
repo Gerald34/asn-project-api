@@ -24,7 +24,7 @@ class UserRegistrationController extends Controller
         if ($request->input('password') === $request->input('confirmPassword')) {
             $registration = [
                 'email' => $request->input('email'),
-                'password' => Hash::make($request->input('password'))
+                'password' => $request->input('password')
             ];
         } else {
             $this->response = [

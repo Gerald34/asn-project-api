@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 use App\Http\Resources\AvatarResource;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Storage;
+use App\AvatarModel;
 /**
  * Class AvatarController
  * @package App\Http\Controllers
@@ -14,28 +15,42 @@ class AvatarController extends Controller
     private $response;
 
     /**
-     * @param $id
+     * @param $uid
      * @return array
      */
-    public function getUserAvatar($id) {
-        $this->response = AvatarResource::getAvatar($id);
-
+    public function getUserAvatar($uid) {
+        $this->response = AvatarResource::getAvatar($uid);
         return $this->response;
+    }
+
+    public static function avatar($avatar) {
+        return AvatarResource::getImage($avatar);
     }
 
     /**
      * @param Request $request
-     * @return string
+     * @return array
      */
-    public function uploadUserAvatar(Request $request) {
+    public function saveImage(Request $request) {
+        $uid = $request->input('uid');
+        $fileNameToStore = [];
+        $filePath = '';
+        if ($request->hasFile('avatar')) {
+            // get filename with extension
+            $fileNameWithExtension = $request->file('avatar')->getClientOriginalName();
+            // get filename without extension
+            $filename = pathinfo($fileNameWithExtension, PATHINFO_FILENAME);
+            // get file extension
+            $extension = $request->file('avatar')->getClientOriginalExtension();
+            // filename to store
+            $fileNameToStore = $uid . '_' .$filename . '.' . $extension;
+            // upload File to external server
+            Storage::disk('avatar')->put($fileNameToStore, fopen($request->file('avatar'), 'r+'));
+            $filePath = Storage::disk('avatar')->url($fileNameToStore);
+            AvatarResource::addImageDataToDatabase($uid, $fileNameToStore);
+        }
 
-        $upload = [
-            'user_id' => $request->input('user_id'),
-            'avatar' => $request->file('avatar'),
-            'uploaded_date' => Carbon::now()
-        ];
-
-        return AvatarResource::uploadAvatar($upload);
+        return ['status' => 'Images uploaded', 'image_name' => $fileNameToStore, 'path' => $filePath];
     }
 
 }
