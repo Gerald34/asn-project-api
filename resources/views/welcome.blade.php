@@ -9,16 +9,22 @@
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Fira+Sans:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
         <!-- Styles -->
         <style>
+            * {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+
             html, body {
                 background-color: #fff;
                 color: #636b6f;
-                font-family: 'Nunito', sans-serif;
                 font-weight: 200;
                 height: 100vh;
                 margin: 0;
+                font-family: 'Fira Sans', sans-serif;
             }
 
             .full-height {
@@ -46,7 +52,7 @@
             }
 
             .title {
-                font-size: 84px;
+                font-size: 54px;
             }
 
             .links > a {
@@ -78,17 +84,17 @@
             @endif
 
             <div class="content">
+
                 <div class="title m-b-md">
-                    Laravel
+                    Developer Backend Dashboard
                 </div>
 
                 <div class="links">
-                    <a href="https://laravel.com/docs">Documentation</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://nova.laravel.com">Nova</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
+                    <a href="https://github.com/Gerald34/asn-project-api" target="_blank">API Documentation</a>
+                    <a href="#" target="_blank">Production Environment</a>
+                    <a href="#" target="_blank">Stage Environment</a>
+                    <a href="https://www.instagram.com/gerald_codex/" target="_blank">Developer Instagram</a>
+                    <a href="https://github.com/Gerald34/asn-project-api" target="_blank">Project GitHub</a>
                 </div>
             </div>
         </div>

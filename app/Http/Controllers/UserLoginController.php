@@ -27,4 +27,8 @@ class UserLoginController extends Controller
         return $this->response;
     }
 
+    public function logout($token) {
+
+    }
+
 }

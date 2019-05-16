@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Response;
 
 class ExampleTest extends TestCase
 {
@@ -14,8 +15,7 @@ class ExampleTest extends TestCase
      */
     public function testBasicTest()
     {
-        $response = $this->get('/');
-
+        $response = $this->post('api/app/login', ['email' => 'code45dev@gmail.com']);
         $response->assertStatus(200);
     }
 }

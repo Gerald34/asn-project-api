@@ -4,28 +4,32 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Resources\TeamsResource;
+
 class TeamsController extends Controller
 {
     private $response;
-    /**
-     * @param Request $request
-     * @return array|\Illuminate\Database\Query\Builder
-     */
-    public function create(Request $request) {
-        $data = [
-            'uid' => trim(strip_tags($request->input('uid'))),
-            'team_name' => strip_tags($request->input('team_name')),
-            'sports_category' => trim(strip_tags($request->input('sports_category')))
-        ];
-        return TeamsResource::dataCollection($data);
-    }
 
     /**
+     * Create team controller | Expected args { uid, team name, team sports category }
      * @param Request $request
      * @return array
      */
-    public function getTeam(Request $request) {
-        $uid = $request->input('uid');
+    public function create(Request $request) {
+
+            $uid = trim(strip_tags($request->input('uid')));
+            $team_name = strip_tags($request->input('team_name'));
+            $sports_category = trim(strip_tags($request->input('sports_category')));
+
+        $this->response = TeamsResource::CreateNewTeamDataCollection($uid, $team_name, $sports_category);
+        return $this->response;
+    }
+
+    /**
+     * Get team by owner uid
+     * @param $uid
+     * @return array
+     */
+    public function getTeam($uid) {
         return TeamsResource::findTeamByUID($uid);
     }
 

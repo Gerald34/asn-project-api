@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\MyInformationModel as UserProfile;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Response;
+
 class UserController extends Controller
 {
     private $response;
@@ -78,4 +82,5 @@ class UserController extends Controller
 
         return $this->response;
     }
+
 }

@@ -16,4 +16,9 @@ class Authenticate extends Middleware
     {
         return route('login');
     }
+
+    public function authorization() {
+        return ['errorCode' => 306, 'errorMessage' => 'Request not authorized, please login to gain authorised access'];
+    }
+
 }

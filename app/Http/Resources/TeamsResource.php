@@ -18,20 +18,23 @@ class TeamsResource extends JsonResource
     private static $response;
 
     /**
-     * @param array $data
-     * @return array|\Illuminate\Database\Query\Builder
+     * Create team data collection | Expected args { uid, team name, team sports category }
+     * @param string $uid
+     * @param string $team_name
+     * @param string $sports_category
+     * @return array
      */
-    public static function dataCollection(array $data) {
-        $ownership = self::_validateOwnership($data['uid']);
+    public static function CreateNewTeamDataCollection(string $uid, string $team_name, string $sports_category) {
+        $ownership = self::_validateOwnership($uid);
         if (isset($ownership) && $ownership->active === 1) {
             self::$response = [
                 'errorCode' => 501,
                 'errorMessage' => 'Sorry you cannot create more than 1 team.'
             ];
         } else {
-            $slugFromName = Generator::generateSlugFromName($data['team_name']);
+            $slugFromName = Generator::generateSlugFromName($team_name);
             $teamIdGenerate = Generator::generateRandomString(8);
-            self::$response = self::_createTeam($data, $slugFromName, $teamIdGenerate);
+            self::$response = self::_createTeam($uid, $team_name, $sports_category, $slugFromName, $teamIdGenerate);
         }
         return self::$response;
     }
@@ -45,30 +48,33 @@ class TeamsResource extends JsonResource
     }
 
     /**
-     * @param $data
+     * Save team data into database by uid
+     * @param $uid
+     * @param $team_name
+     * @param $sports_category
      * @param $slugFromName
      * @param $teamIdGenerate
      * @return array
      */
-    private static function _createTeam($data, $slugFromName, $teamIdGenerate) {
+    private static function _createTeam($uid, $team_name, $sports_category, $slugFromName, $teamIdGenerate) {
         $create = Team::create([
-            'uid' => $data['uid'],
-            'owner' => $data['uid'],
+            'uid' => $uid,
+            'owner' => $uid,
             'team_id' => $teamIdGenerate,
-            'team_name' => $data['team_name'],
+            'team_name' => $team_name,
             'team_slug' => $slugFromName,
-            'sports_category' => $data['sports_category'],
+            'sports_category' => $sports_category,
             'active' => 1,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
         $firebaseData = [
-            'uid' => $data['uid'],
-            'owner' => $data['uid'],
+            'uid' => $uid,
+            'owner' => $uid,
             'team_id' => $teamIdGenerate,
-            'team_name' => $data['team_name'],
+            'team_name' => $team_name,
             'team_slug' => $slugFromName,
-            'sports_category' => $data['sports_category'],
+            'sports_category' => $sports_category,
             'active' => 1,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
