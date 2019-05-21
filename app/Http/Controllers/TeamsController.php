@@ -14,11 +14,11 @@ class TeamsController extends Controller
      * @param Request $request
      * @return array
      */
-    public function create(Request $request) {
-
-            $uid = trim(strip_tags($request->input('uid')));
-            $team_name = strip_tags($request->input('team_name'));
-            $sports_category = trim(strip_tags($request->input('sports_category')));
+    public function create(Request $request)
+    {
+        $uid = trim(strip_tags($request->input('uid')));
+        $team_name = strip_tags($request->input('team_name'));
+        $sports_category = trim(strip_tags($request->input('sports_category')));
 
         $this->response = TeamsResource::CreateNewTeamDataCollection($uid, $team_name, $sports_category);
         return $this->response;
@@ -29,7 +29,8 @@ class TeamsController extends Controller
      * @param $uid
      * @return array
      */
-    public function getTeam($uid) {
+    public function getTeam($uid)
+    {
         return TeamsResource::findTeamByUID($uid);
     }
 
@@ -37,7 +38,8 @@ class TeamsController extends Controller
      * @param Request $request
      * @return array
      */
-    public function editTeamByOwnership(Request $request) {
+    public function editTeamByOwnership(Request $request)
+    {
         $data = [
             'uid' => trim(strip_tags($request->input('uid'))),
             'teamHash' => trim(strip_tags($request->input('teamHash'))),
@@ -51,13 +53,15 @@ class TeamsController extends Controller
      * @param Request $request
      * @return array
      */
-    public function removeExistingTeamByUID(Request $request) {
+    public function removeExistingTeamByUID(Request $request)
+    {
         $uid = $request->input('uid');
         $teamHash = $request->input('teamHash');
         return TeamsResource::findAndRemoveTeamByOwnership($uid, $teamHash);
     }
 
-    public function joinTeam(Request $request) {
+    public function joinTeam(Request $request)
+    {
         $data = [
             'uid' => trim(strip_tags($request->input('uid'))),
             'team_id' => trim(strip_tags($request->input('team_id'))),

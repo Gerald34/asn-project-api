@@ -53,4 +53,8 @@ class AvatarResource extends JsonResource
         return $response;
     }
 
+    public static function getCurrentUserAvatar($uid) {
+        return AvatarModel::select('avatar')->where('uid', $uid)->first();
+    }
+
 }

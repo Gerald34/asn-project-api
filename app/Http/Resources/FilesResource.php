@@ -6,8 +6,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 
-class FilesResource extends JsonResource
-{
+class FilesResource extends JsonResource {
     protected static $response;
     /**
      * Transform the resource into an array.
@@ -15,8 +14,7 @@ class FilesResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function toArray($request)
-    {
+    public function toArray($request) {
         return parent::toArray($request);
     }
 

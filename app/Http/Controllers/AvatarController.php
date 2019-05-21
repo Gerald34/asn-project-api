@@ -27,6 +27,10 @@ class AvatarController extends Controller
         return AvatarResource::getImage($avatar);
     }
 
+    public function getCurrent($uid) {
+        return AvatarResource::getCurrentUserAvatar($uid);
+    }
+
     /**
      * @param Request $request
      * @return array

@@ -52,12 +52,14 @@ Route::group(['prefix' => '1.1.0'], function() {
         Route::group(['prefix' => 'profile'], function() {
             // User avatar
             Route::group(['prefix' => 'avatar'], function() {
+                Route::get('getCurrent/{uid}', 'AvatarController@getCurrent');
                 Route::post('uploadAvatar', 'AvatarController@saveImage');
                 Route::get('get/{avatar}', 'UserController@getAvatarImageFile');
             });
             // Timeline posts
             Route::group(['prefix' => '/posts'], function() {
-                Route::get('getPosts/{id}', 'FeedPostsController@getUserPosts');
+                Route::get('get/{uid}', 'FeedPostsController@getUserPosts');
+                Route::post('post', 'FeedPostsController@postUserPosts');
             });
         });
 

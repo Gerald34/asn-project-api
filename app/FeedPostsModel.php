@@ -20,11 +20,11 @@ class FeedPostsModel extends Model
      */
     protected $fillable = [
         'id',
-        'user_id',
+        'uid',
         'message',
         'image',
-        'creation_date',
-        'last_update'
+        'created_at',
+        'updated_at'
     ];
 
 }
