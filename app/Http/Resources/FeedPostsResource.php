@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 class FeedPostsResource extends JsonResource
 {
+    private static $response;
     /**
      * Transform the resource into an array.
      *
@@ -27,7 +28,16 @@ class FeedPostsResource extends JsonResource
             ->where('posts.uid', '=', $uid)
             ->get();
 
-        return $posts;
+//        $posts = DB::table('posts')
+//            ->where('uid', $uid)
+//            ->get();
+
+        if ($posts->isEmpty()):
+            self::$response = ['response' => 204 ];
+        else:
+            self::$response = ['response' => 200, 'data' => $posts ];
+        endif;
+        return self::$response;
     }
 
     public static function postStatusUpdate($uid, $message, $fileNameToStore): void {

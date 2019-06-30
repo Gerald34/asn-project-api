@@ -15,11 +15,12 @@ class UserLoginController extends Controller
 
         $authorize = FirebaseResource::login($request->input('userEmail'));
         if (isset($authorize->uid)) {
-            $studentData = [
-                'uid' => $authorize->uid
+            $userData = [
+                'uid' => $authorize->uid,
+                'last_login' => $authorize->metadata->lastLoginAt
             ];
-            $userInformation = UserLoginResource::findUser($studentData);
-            $this->response = [ 'successCode' => 201, 'auth' => $authorize, 'userInformation' => $userInformation ];
+            $userInformation = UserLoginResource::findUser($userData);
+            $this->response = [ 'successCode' => 201, 'userInformation' => $userInformation ];
         } else {
             $this->response = ['errorCode' => 401, 'errorMessage' =>  $authorize];
         }

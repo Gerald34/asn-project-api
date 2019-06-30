@@ -36,24 +36,24 @@ class AvatarResource extends JsonResource
         AvatarModel::where('uid', $uid)->update($avatarData);
     }
 
-    public static function getImage($avatar) {
+    public static function getImage($uid) {
+        $avatar = self::_getCurrentUserAvatar($uid);
 
-        $path = storage_path('app/avatars/' . $avatar);
-
-        if (!File::exists($path)) {
-            abort(404);
+        if (empty($avatar)) {
+            self::$response = null;
+        } else {
+            $path = storage_path('app/avatars/' . $avatar->avatar);
+            if (!File::exists($path)) { abort(404); }
+            $file = File::get($path);
+            $type = File::mimeType($path);
+            self::$response = Response::make($file, 200);
+            self::$response->header("Content-Type", $type);
         }
 
-        $file = File::get($path);
-        $type = File::mimeType($path);
-
-        $response = Response::make($file, 200);
-        $response->header("Content-Type", $type);
-
-        return $response;
+        return self::$response;
     }
 
-    public static function getCurrentUserAvatar($uid) {
+    public static function _getCurrentUserAvatar($uid) {
         return AvatarModel::select('avatar')->where('uid', $uid)->first();
     }
 

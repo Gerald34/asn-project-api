@@ -22,14 +22,15 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::group(['prefix' => '1.1.0'], function() {
     //Token
-    Route::get('/token', function() {
-        return csrf_token();
-    });
+    // Route::get('/token', function() {
+    //     return csrf_token();
+    // });
 
-    Route::group(['prefix' => '/app'], function() {
-        Route::post('/login', 'UserLoginController@login');
+Route::group(['prefix' => '1.1.0'], function() {
+
+    Route::group(['prefix' => 'app'], function() {
+        Route::post('login', 'UserLoginController@login');
         Route::post('/register', 'UserRegistrationController@register');
     });
 
@@ -50,11 +51,16 @@ Route::group(['prefix' => '1.1.0'], function() {
 
         // User profile information
         Route::group(['prefix' => 'profile'], function() {
+
+            // Get user information
+            Route::group(['prefix' => 'information'], function() {
+                Route::get('get/{uid}', 'UserInformationController@getInformation');
+            });
             // User avatar
             Route::group(['prefix' => 'avatar'], function() {
                 Route::get('getCurrent/{uid}', 'AvatarController@getCurrent');
                 Route::post('uploadAvatar', 'AvatarController@saveImage');
-                Route::get('get/{avatar}', 'UserController@getAvatarImageFile');
+                Route::get('get/{uid}', 'AvatarController@getAvatarImageFile');
             });
             // Timeline posts
             Route::group(['prefix' => '/posts'], function() {
@@ -69,6 +75,10 @@ Route::group(['prefix' => '1.1.0'], function() {
         Route::get('/activities', 'AppController@activities');
         Route::get('/activitypositions/{id}', 'AppController@getPositionsByActivity');
         Route::any('like', 'ProfileController@likePost');
+    });
+
+    Route::group(['prefix' => 'team'], function() {
+        Route::get('get/{teamID}', 'TeamController@getTeam');
     });
 
     Route::group(['prefix' => '/tester'], function() {

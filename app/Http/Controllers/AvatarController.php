@@ -27,10 +27,6 @@ class AvatarController extends Controller
         return AvatarResource::getImage($avatar);
     }
 
-    public function getCurrent($uid) {
-        return AvatarResource::getCurrentUserAvatar($uid);
-    }
-
     /**
      * @param Request $request
      * @return array
@@ -55,6 +51,11 @@ class AvatarController extends Controller
         }
 
         return ['status' => 'Images uploaded', 'image_name' => $fileNameToStore, 'path' => $filePath];
+    }
+
+    public function getAvatarImageFile($uid) {
+        $avatar = AvatarResource::getImage($uid);
+        return ($avatar !== null)? $avatar : 'Image not found';
     }
 
 }

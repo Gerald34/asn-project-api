@@ -15,12 +15,14 @@ class UserLoginResource extends JsonResource
     private static $response;
 
     /**
-     * @param $studentData
+     * @param $userData
      * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Query\Builder|object|null
      */
-    public static function findUser($studentData)
+    public static function findUser($userData)
     {
-        return UserLoginModel::where('uid', $studentData['uid'])->first();
+        UserLoginModel::where('uid', $userData['uid'])
+            ->update(['last_login' => $userData['last_login']]);
+        return UserLoginModel::select('uid')->where('uid', $userData['uid'])->first();
     }
 
 }
