@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 use App\Http\Resources\AvatarResource;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use App\AvatarModel;
+use App\Http\Resources\FirebaseResource;
 /**
  * Class AvatarController
  * @package App\Http\Controllers
@@ -48,6 +50,7 @@ class AvatarController extends Controller
             Storage::disk('avatar')->put($fileNameToStore, fopen($request->file('avatar'), 'r+'));
             $filePath = Storage::disk('avatar')->url($fileNameToStore);
             AvatarResource::addImageDataToDatabase($uid, $fileNameToStore);
+            FirebaseResource::getUserAvatar($request->hasFile('avatar'));
         }
 
         return ['status' => 'Images uploaded', 'image_name' => $fileNameToStore, 'path' => $filePath];
@@ -56,6 +59,19 @@ class AvatarController extends Controller
     public function getAvatarImageFile($uid) {
         $avatar = AvatarResource::getImage($uid);
         return ($avatar !== null)? $avatar : 'Image not found';
+    }
+
+    public function fileProcessor(Request $request) {
+        $uid = $request->input('uid');
+        $base64_image = $request->input('avatar');
+        if (preg_match('/^data:image\/(\w+);base64,/', $base64_image)) {
+            $data = substr($base64_image, strpos($base64_image, ',') + 1);
+            $fileNameToStore = 'current_' . $uid . '.png';
+            $data = base64_decode($data);
+            Storage::disk('avatar')->put($fileNameToStore, $data);
+            AvatarResource::addImageDataToDatabase($uid, $fileNameToStore);
+        }
+        return self::getUserAvatar($uid);
     }
 
 }

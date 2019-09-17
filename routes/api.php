@@ -60,6 +60,7 @@ Route::group(['prefix' => '1.1.0'], function() {
             Route::group(['prefix' => 'avatar'], function() {
                 Route::get('getCurrent/{uid}', 'AvatarController@getCurrent');
                 Route::post('uploadAvatar', 'AvatarController@saveImage');
+                Route::post('imageProcessor', 'AvatarController@fileProcessor');
                 Route::get('get/{uid}', 'AvatarController@getAvatarImageFile');
             });
             // Timeline posts
@@ -83,6 +84,12 @@ Route::group(['prefix' => '1.1.0'], function() {
 
     Route::group(['prefix' => '/tester'], function() {
         Route::get('/test/{name}', 'FilesController@testerMethod');
+    });
+
+    Route::group(['prefix' => '/teams'], function() {
+       Route::get('/fetch', 'TeamController@getAllTeams');
+       Route::get('/categories', 'TeamController@getCategories');
+       Route::post('/create', 'TeamController@create');
     });
 });
 

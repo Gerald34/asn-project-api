@@ -6,7 +6,7 @@ use App\AvatarModel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
-
+use Intervention\Image\Facades\Image;
 class AvatarResource extends JsonResource
 {
     private static $response;
@@ -55,6 +55,25 @@ class AvatarResource extends JsonResource
 
     public static function _getCurrentUserAvatar($uid) {
         return AvatarModel::select('avatar')->where('uid', $uid)->first();
+    }
+
+    public static function processImage($image) {
+        return Image::make($image)->mime();
+        $resized = Image::make($image)->resize(400, 400);
+        dd($resized);
+        return $resized;
+        $dimensions =  self::imageDimensions($image);
+        if ($dimensions['response'] !== true) {
+            self::$response = ['304' => 'image diemsions too large'];
+        }
+    }
+
+    private static function imageDimensions($image) {
+        $height = Image::make($image)->height();
+        $width = Image::make($image)->width();
+        return (($height >= 700) && ($width >= 700))
+            ? ['response' => true]
+            : ['response' => false];
     }
 
 }

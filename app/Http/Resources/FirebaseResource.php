@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Config;
 use Kreait\Firebase\ServiceAccount;
@@ -124,5 +125,40 @@ class FirebaseResource extends JsonResource
                 'uid' => $uid,
                 'likeCount' => count($likeCount),
             ]);
+    }
+
+    /**
+     * @param $uid
+     * @param $message
+     * @param $fileNameToStore
+     * @param $postID
+     */
+    public static function userPosts($uid, $message, $fileNameToStore, $postID) {
+        self::$_firebase = (new Factory)
+            ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/../../../' . Config::get('constants.firebase')))
+            ->withDatabaseUri(Config::get('constants.firebase_database'))->create();
+        $database = self::$_firebase->getDatabase();
+        $database->getReference('posts/' . $uid)->set(
+            [
+                'uid' => $uid,
+                'post_id' => $postID,
+                'message' => $message,
+                'image' => $fileNameToStore,
+                'likes' => FeedPostsResource::_getPostLikes($postID),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
+            ]);
+    }
+
+    public static function getUserAvatar($avatar) {
+        self::$_firebase = (new Factory)
+            ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/../../../' . Config::get('constants.firebase')))
+            ->withDatabaseUri(Config::get('constants.firebase_database'))->create();
+
+
+        $storage =  self::$_firebase->getStorage();
+        $bucket = $storage->getBucket();
+        // Get the default filesystem
+        $filesystem = $storage->getFilesystem();
     }
 }

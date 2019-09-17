@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\UserLoginModel as Users;
-use App\TeamsModel as Team;
+use App\TeamModel;
 use App\UserFollowersModel;
 class UserInformationResource extends JsonResource
 {
@@ -21,6 +21,7 @@ class UserInformationResource extends JsonResource
     }
 
     public static function getInformation($uid) {
+
         return self::$information = [
             'personal' => self::_personalData($uid),
             'team' => [
@@ -43,8 +44,8 @@ class UserInformationResource extends JsonResource
     }
 
     private static function _teamData($uid) {
-        $findTeam = Team::where('uid', $uid)->first();
-        return (empty($findTeam)) ? $findTeam : ['response' => 'No team found, create team.'] ;
+        $findTeam = TeamModel::where('uid', $uid)->first();
+        return (!empty($findTeam)) ? $findTeam : ['response' => 'No team found, create team.'] ;
     }
 
     private static function _getSportsType($uid) {

@@ -32,4 +32,12 @@ class TeamController extends Controller
     public function JoinTeam($uid, $teamUid) {
         return TeamResource::joinTeam($uid, $teamUid);
     }
+
+    public function getAllTeams() {
+        return TeamResource::getTeams();
+    }
+
+    public function getCategories() {
+        return TeamResource::getCategories();
+    }
 }
