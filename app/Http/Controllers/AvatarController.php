@@ -56,11 +56,28 @@ class AvatarController extends Controller
         return ['status' => 'Images uploaded', 'image_name' => $fileNameToStore, 'path' => $filePath];
     }
 
+    /**
+     * @param $uid
+     * @return \Illuminate\Http\Response|string|null
+     */
     public function getAvatarImageFile($uid) {
         $avatar = AvatarResource::getImage($uid);
         return ($avatar !== null)? $avatar : 'Image not found';
     }
 
+    /**
+     * @param $uid
+     * @return \Illuminate\Http\Response|string|null
+     */
+    public function getCoverImageFile($uid) {
+        $coverImage = AvatarResource::getCoverImage($uid);
+        return ($coverImage !== null)? $coverImage : 'Image not found';
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     */
     public function fileProcessor(Request $request) {
         $uid = $request->input('uid');
         $base64_image = $request->input('avatar');
@@ -68,7 +85,7 @@ class AvatarController extends Controller
             $data = substr($base64_image, strpos($base64_image, ',') + 1);
             $fileNameToStore = 'current_' . $uid . '.png';
             $data = base64_decode($data);
-            Storage::disk('avatar')->put($fileNameToStore, $data);
+            Storage::disk('cover')->put($fileNameToStore, $data);
             AvatarResource::addImageDataToDatabase($uid, $fileNameToStore);
         }
         return self::getUserAvatar($uid);

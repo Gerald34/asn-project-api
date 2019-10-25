@@ -8,10 +8,15 @@ use App\MyInformationModel as UserProfile;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
     private $response;
+
+    public function registeredUsers() {
+        return DB::table('users')->get();
+    }
 
     public function getMyInformation($userID)
     {

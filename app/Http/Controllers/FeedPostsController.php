@@ -23,6 +23,9 @@ class FeedPostsController extends Controller
         return FeedPostsResource::fetchPosts($uid);
     }
 
+    /**
+     *
+     */
     public function postUserPosts(Request $request) {
         $uid = $request->input('uid');
         $message = $request->input('message');

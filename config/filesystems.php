@@ -53,6 +53,11 @@ return [
             'root' => storage_path('app/avatars'),
         ],
 
+        'cover' => [
+            'driver' => 'local',
+            'root' => storage_path('app/covers'),
+        ],
+
         'posts' => [
             'driver' => 'local',
             'root' => storage_path('app/posts'),

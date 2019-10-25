@@ -59,7 +59,7 @@ class FirebaseResource extends JsonResource
             [
                 'uid' => $data->uid,
                 'emails' => $data->email,
-                'status' => 'online',
+                'status' => 1,
                 'personal_information' => [
                     'first_name' => $data->first_name,
                     'last_name' => $data->last_name,
@@ -150,6 +150,9 @@ class FirebaseResource extends JsonResource
             ]);
     }
 
+    /**
+     * @param $avatar
+     */
     public static function getUserAvatar($avatar) {
         self::$_firebase = (new Factory)
             ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/../../../' . Config::get('constants.firebase')))
@@ -161,4 +164,5 @@ class FirebaseResource extends JsonResource
         // Get the default filesystem
         $filesystem = $storage->getFilesystem();
     }
+
 }

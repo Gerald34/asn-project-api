@@ -29,6 +29,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::group(['prefix' => '1.1.0'], function() {
 
+    Route::get('registered_users/{uid}', 'AppEngineController@registeredUsers');
+
     Route::group(['prefix' => 'app'], function() {
         Route::post('login', 'UserLoginController@login');
         Route::post('/register', 'UserRegistrationController@register');
@@ -63,6 +65,12 @@ Route::group(['prefix' => '1.1.0'], function() {
                 Route::post('imageProcessor', 'AvatarController@fileProcessor');
                 Route::get('get/{uid}', 'AvatarController@getAvatarImageFile');
             });
+
+            // user cover image
+            Route::group(['prefix' => 'cover'], function() {
+                Route::get('get/{uid}', 'AvatarController@getCoverImageFile');
+            });
+
             // Timeline posts
             Route::group(['prefix' => '/posts'], function() {
                 Route::get('get/{uid}', 'FeedPostsController@getUserPosts');

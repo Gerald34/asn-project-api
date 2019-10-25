@@ -22,13 +22,13 @@ class FeedPostsResource extends JsonResource
     {
         $feedData = [];
         // Fetch user feed posts
-        $posters = DB::table('posts')->select('poster_id')->where('uid', $uid)->get();
+        $posters = DB::table('posts')->select('uid', 'post_id')->where('uid', $uid)->get();
         // Get each user id
         foreach ($posters as $poster) {
             $postInformation = [
-                'avatar' => self::_getUserAvatar($poster->poster_id),
-                'feedData' => self::_getFeedPosts($poster->poster_id),
-                'userInformation' => self::_getUserInformation($poster->poster_id)
+                'avatar' => self::_getUserAvatar($poster->uid),
+                'feedData' => self::_getFeedPosts($poster->post_id),
+                'userInformation' => self::_getUserInformation($poster->uid)
             ];
             // Feed object push
             $feedData[] = $postInformation;
@@ -63,7 +63,7 @@ class FeedPostsResource extends JsonResource
      */
     private static function _getFeedPosts($uid)
     {
-        $posts = DB::table('posts')->where('poster_id', $uid)->first();
+        $posts = DB::table('posts')->where('post_id', $uid)->first();
         // $feedObject = [];
         $feedObject = [
             'feed' => $posts,

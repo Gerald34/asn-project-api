@@ -50,7 +50,13 @@ class UserRegistrationResource extends JsonResource
                 ->where('uid', $registration['uid'])
                 ->first();
             FirebaseResource::realtimeDatabase($user);
-            self::$response = ['successCode' => 202, 'successMessage' => 'User Successfully Registered', 'user' => $user];
+            self::$response = [
+                'successCode' => 202,
+                'successMessage' => 'Profile created successfully.',
+                'userInformation' => [
+                    'uid' => $registration['uid']
+                ]
+            ];
         }
 
         return self::$response;
