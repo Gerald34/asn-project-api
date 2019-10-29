@@ -24,7 +24,8 @@ class FeedPostsController extends Controller
     }
 
     /**
-     *
+     * @param Request $request
+     * @return array
      */
     public function postUserPosts(Request $request) {
         $uid = $request->input('uid');
@@ -32,7 +33,6 @@ class FeedPostsController extends Controller
 
         //if ($request->hasFile('image')) {
             $files[] = $request->file('images');
-            dd($files); exit;
             $images = [];
             foreach($files as $file) {
                 // get filename with extension

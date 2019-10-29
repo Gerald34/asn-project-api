@@ -25,6 +25,10 @@ class AvatarController extends Controller
         return $this->response;
     }
 
+    /**
+     * @param $avatar
+     * @return \Illuminate\Http\Response|null
+     */
     public static function avatar($avatar) {
         return AvatarResource::getImage($avatar);
     }
@@ -47,8 +51,8 @@ class AvatarController extends Controller
             // filename to store
             $fileNameToStore = $uid . '_' .$filename . '.' . $extension;
             // upload File to external server
-            Storage::disk('avatar')->put($fileNameToStore, fopen($request->file('avatar'), 'r+'));
-            $filePath = Storage::disk('avatar')->url($fileNameToStore);
+            Storage::disk('profiles')->put('$uid/' . $fileNameToStore, fopen($request->file('avatar'), 'r+'));
+            $filePath = Storage::disk('profiles')->url($fileNameToStore);
             AvatarResource::addImageDataToDatabase($uid, $fileNameToStore);
             FirebaseResource::getUserAvatar($request->hasFile('avatar'));
         }
@@ -82,13 +86,17 @@ class AvatarController extends Controller
         $uid = $request->input('uid');
         $base64_image = $request->input('avatar');
         if (preg_match('/^data:image\/(\w+);base64,/', $base64_image)) {
+            $extension = '.png';
             $data = substr($base64_image, strpos($base64_image, ',') + 1);
-            $fileNameToStore = 'current_' . $uid . '.png';
+            $time = time();
+            $fileStorage = $uid . '/' . $time . $extension;
+            $fileNameToStore = $time . $extension;
             $data = base64_decode($data);
-            Storage::disk('cover')->put($fileNameToStore, $data);
+            Storage::disk('profiles')->put($fileStorage, $data);
             AvatarResource::addImageDataToDatabase($uid, $fileNameToStore);
         }
-        return self::getUserAvatar($uid);
+
+        return ['status' => 200, 'response' => true];
     }
 
 }

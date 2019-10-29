@@ -11,13 +11,14 @@ class AppEngineResource extends JsonResource
 {
     private static $response;
     public static function processRegisteredUserInformation($users) {
-
+        $avatar = new AvatarController();
         $userData = [];
         foreach ($users as $user) {
             $userInformation = [
                 'uid' => $user->uid,
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
+                'avatarUrl' => url('/') . '/' . $avatar->getAvatarImageFile($user->uid),
                 'team' => self::getTeamInformation($user->uid)
             ];
             $userData[] = $userInformation;

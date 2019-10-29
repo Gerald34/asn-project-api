@@ -37,7 +37,6 @@ class AvatarResource extends JsonResource
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ];
-
         // store $fileNameToStore in the database
         AvatarModel::where('uid', $uid)->update($avatarData);
     }
@@ -52,7 +51,7 @@ class AvatarResource extends JsonResource
         if (empty($avatar)) {
             self::$response = null;
         } else {
-            $path = storage_path('app/avatars/' . $avatar->avatar);
+            $path = storage_path('app/profiles/' . $uid . '/' . $avatar->avatar);
             if (!File::exists($path)) { abort(404); }
             $file = File::get($path);
             $type = File::mimeType($path);
@@ -104,10 +103,10 @@ class AvatarResource extends JsonResource
      * @return \Intervention\Image\Image|string
      */
     public static function processImage($image) {
-        return Image::make($image)->mime();
+        // return Image::make($image)->mime();
         $resized = Image::make($image)->resize(400, 400);
-        dd($resized);
-        return $resized;
+        // dd($resized);
+        // return $resized;
         $dimensions =  self::imageDimensions($image);
         if ($dimensions['response'] !== true) {
             self::$response = ['304' => 'image diemsions too large'];

@@ -10,7 +10,8 @@ class AppEngineController extends Controller
     private $response;
 
     public function registeredUsers($uid) {
-        $users = DB::table('users')->get();
+        $users = DB::table('users')->where('uid', '!=', $uid)->get();
+
         $this->response = AppEngineResource::processRegisteredUserInformation($users);
         return $this->response;
     }

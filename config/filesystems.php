@@ -48,14 +48,9 @@ return [
             'root' => storage_path('app'),
         ],
 
-        'avatar' => [
+        'profiles' => [
             'driver' => 'local',
-            'root' => storage_path('app/avatars'),
-        ],
-
-        'cover' => [
-            'driver' => 'local',
-            'root' => storage_path('app/covers'),
+            'root' => storage_path('app/profiles'),
         ],
 
         'posts' => [

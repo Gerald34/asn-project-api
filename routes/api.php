@@ -61,7 +61,7 @@ Route::group(['prefix' => '1.1.0'], function() {
             // User avatar
             Route::group(['prefix' => 'avatar'], function() {
                 Route::get('getCurrent/{uid}', 'AvatarController@getCurrent');
-                Route::post('uploadAvatar', 'AvatarController@saveImage');
+                // Route::post('uploadAvatar', 'AvatarController@saveImage');
                 Route::post('imageProcessor', 'AvatarController@fileProcessor');
                 Route::get('get/{uid}', 'AvatarController@getAvatarImageFile');
             });
