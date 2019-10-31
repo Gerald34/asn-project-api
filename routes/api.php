@@ -58,10 +58,11 @@ Route::group(['prefix' => '1.1.0'], function() {
             Route::group(['prefix' => 'information'], function() {
                 Route::get('get/{uid}', 'UserInformationController@getInformation');
             });
+
             // User avatar
             Route::group(['prefix' => 'avatar'], function() {
                 Route::get('getCurrent/{uid}', 'AvatarController@getCurrent');
-                // Route::post('uploadAvatar', 'AvatarController@saveImage');
+                Route::post('uploadAvatar', 'AvatarController@saveImage');
                 Route::post('imageProcessor', 'AvatarController@fileProcessor');
                 Route::get('get/{uid}', 'AvatarController@getAvatarImageFile');
             });
@@ -75,6 +76,7 @@ Route::group(['prefix' => '1.1.0'], function() {
             Route::group(['prefix' => '/posts'], function() {
                 Route::get('get/{uid}', 'FeedPostsController@getUserPosts');
                 Route::post('post', 'FeedPostsController@postUserPosts');
+                Route::get('postImage/{uid}/{post_id}/{imageName}', 'FeedPostsController@getPostImage');
             });
         });
 

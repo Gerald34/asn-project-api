@@ -53,6 +53,11 @@ return [
             'root' => storage_path('app/profiles'),
         ],
 
+        'avatars' => [
+            'driver' => 'local',
+            'root' => storage_path('app/avatars'),
+        ],
+
         'posts' => [
             'driver' => 'local',
             'root' => storage_path('app/posts'),

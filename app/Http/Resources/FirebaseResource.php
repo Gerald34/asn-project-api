@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Config;
 use Kreait\Firebase\ServiceAccount;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Exception\Auth\UserNotFound;
-
+use Illuminate\Http\Request;
 class FirebaseResource extends JsonResource
 {
     public static $serviceAccount;
@@ -128,23 +128,23 @@ class FirebaseResource extends JsonResource
     }
 
     /**
-     * @param $uid
-     * @param $message
-     * @param $fileNameToStore
-     * @param $postID
+     * @param array $data
      */
-    public static function userPosts($uid, $message, $fileNameToStore, $postID) {
+    public static function userPosts(array $data, $request)
+    {
+
         self::$_firebase = (new Factory)
             ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/../../../' . Config::get('constants.firebase')))
             ->withDatabaseUri(Config::get('constants.firebase_database'))->create();
         $database = self::$_firebase->getDatabase();
-        $database->getReference('posts/' . $uid)->set(
+        // $bucket = $database->uplaod();
+        $database->getReference('posts/' . $data['uid'] . '/' . $data['post_id'])->set(
             [
-                'uid' => $uid,
-                'post_id' => $postID,
-                'message' => $message,
-                'image' => $fileNameToStore,
-                'likes' => FeedPostsResource::_getPostLikes($postID),
+                'uid' => $data['uid'],
+                'post_id' => $data['post_id'],
+                'message' => $data['message'],
+                'image' => $data['image'],
+                // 'likes' => FeedPostsResource::_getPostLikes($data['post_id']),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now()
             ]);
@@ -153,13 +153,14 @@ class FirebaseResource extends JsonResource
     /**
      * @param $avatar
      */
-    public static function getUserAvatar($avatar) {
+    public static function getUserAvatar($avatar)
+    {
         self::$_firebase = (new Factory)
             ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/../../../' . Config::get('constants.firebase')))
             ->withDatabaseUri(Config::get('constants.firebase_database'))->create();
 
 
-        $storage =  self::$_firebase->getStorage();
+        $storage = self::$_firebase->getStorage();
         $bucket = $storage->getBucket();
         // Get the default filesystem
         $filesystem = $storage->getFilesystem();

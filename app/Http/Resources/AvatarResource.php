@@ -51,7 +51,28 @@ class AvatarResource extends JsonResource
         if (empty($avatar)) {
             self::$response = null;
         } else {
-            $path = storage_path('app/profiles/' . $uid . '/' . $avatar->avatar);
+            $path = storage_path('app/profiles/' . $uid . '/avatars/' . $avatar->avatar);
+            if (!File::exists($path)) { abort(404); }
+            $file = File::get($path);
+            $type = File::mimeType($path);
+            self::$response = Response::make($file, 200);
+            self::$response->header("Content-Type", $type);
+        }
+
+        return self::$response;
+    }
+
+    /**
+     * @param $uid
+     * @return \Illuminate\Http\Response|null
+     */
+    public static function getImage2($uid) {
+        $avatar = self::_getCurrentUserAvatar($uid);
+
+        if (empty($avatar)) {
+            self::$response = null;
+        } else {
+            $path = storage_path('app/avatars/' . $avatar->avatar);
             if (!File::exists($path)) { abort(404); }
             $file = File::get($path);
             $type = File::mimeType($path);
