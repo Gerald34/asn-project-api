@@ -103,4 +103,4 @@ Route::group(['prefix' => '1.1.0'], function() {
     });
 });
 
-
+Route::get('profile/{uid}', 'UserRegistrationController@profile');

@@ -6,6 +6,8 @@ use App\UserLoginModel as Users;
 use Carbon\Carbon;
 use App\AvatarModel;
 use App\UserBackgroundModel;
+use App\Http\Resources\ProfileSetupResource;
+
 /**
  * Class UserRegistrationResource
  * @package App\Http\Resources
@@ -15,19 +17,21 @@ class UserRegistrationResource extends JsonResource
     private static $response;
 
     /**
-     * @param $registration
+     * @param array $registration
+     * @param string $hashedPassword
      * @return array
      */
-    public static function register($registration)
+    public static function register(array $registration, string $hashedPassword)
     {
-        return self::saveRegistration($registration);
+        return self::saveRegistration($registration, $hashedPassword);
     }
 
     /**
-     * @param $registration
+     * @param array $registration
+     * @param string $hashedPassword
      * @return array
      */
-    private static function saveRegistration($registration)
+    private static function saveRegistration(array $registration, string $hashedPassword)
     {
         $check = Users::where('email', $registration['email'])->first();
         if ($check !== null) {
@@ -36,7 +40,7 @@ class UserRegistrationResource extends JsonResource
             Users::create([
                 'uid' => $registration['uid'],
                 'email' => $registration['email'],
-                'password' => $registration['passwordHash'],
+                'password' => $hashedPassword,
                 'verification' => $registration['verification'],
                 'disabled' => $registration['disabled'],
                 'first_name' => $registration['first_name'],
@@ -79,5 +83,4 @@ class UserRegistrationResource extends JsonResource
             'updated_at' => Carbon::now()
         ]);
     }
-
 }

@@ -108,20 +108,21 @@ class FeedPostsResource extends JsonResource
      * @param array $data
      * @param Request $request
      */
-    public static function postStatusUpdate(array $data, $request)
+    public static function postStatusUpdate(array $data)
     {
-//        FeedPostsModel::insert(
-//            [
-//                'uid' => $data['uid'],
-//                'post_id' => $data['postID'],
-//                'message' => $data['message'],
-//                'image' => $data['fileNameToStore'],
-//                'created_at' => $data['created_at'],
-//                'updated_at' => $data['updated_at']
-//            ]
-//        );
-//       FeedPostsModel::where('post_id', $data['postID'])->get();
-        return Firebase::userPosts($data, $request);
+        FeedPostsModel::insert(
+            [
+                'uid' => $data['uid'],
+                'post_id' => $data['postID'],
+                'message' => $data['message'],
+                'image' => $data['fileNameToStore'],
+                'created_at' => $data['created_at'],
+                'updated_at' => $data['updated_at']
+            ]
+        );
+       FeedPostsModel::where('post_id', $data['postID'])->get();
+
+        return Firebase::userPosts($data);
     }
 
     /**

@@ -29,6 +29,13 @@ class FeedPostsController extends Controller
         return FeedPostsResource::fetchPosts($uid);
     }
 
+    /**
+     * @param $uid
+     * @param $post_id
+     * @param $imageName
+     * @return \Illuminate\Http\Response
+     *
+     */
     public function getPostImage($uid, $post_id,  $imageName) {
         $path = storage_path('app/posts/' . $uid . '/' . $post_id . '/' . $imageName);
         if (!File::exists($path)) { abort(404); }
@@ -84,7 +91,7 @@ class FeedPostsController extends Controller
                 'updated_at' => Carbon::now()
             ];
 
-            $this->response = FeedPostsResource::postStatusUpdate($postData, $request);
+            $this->response = FeedPostsResource::postStatusUpdate($postData);
         } else {
             // FeedPostsResource::postStatusUpdate($uid, $message, null);
         }

@@ -17,17 +17,21 @@ class UserLoginController extends Controller
      */
     public function login(Request $request)
     {
+        $fireResource = new FirebaseResource($request);
+        $loginResource = new UserLoginResource($request);
+        $email = trim(strip_tags($request->input('userEmail')));
+        $password = trim(strip_tags($request->input('userPassword')));
         // Firebase authentication
-        $authorize = FirebaseResource::login($request->input('userEmail'));
+        $authorize = $fireResource->login($email, $password);
 
         // Mysql authentication and fetch data
-        if (isset($authorize->uid)) {
+        if (isset($authorize['userInformation']['uid'])) {
             $userData = [
-                'uid' => $authorize->uid,
-                'last_login' => $authorize->metadata->lastLoginAt
+                'uid' => $authorize['userInformation']['uid'],
+                'last_login' => $authorize['userInformation']['lastLoginAt']
             ];
-            $userInformation = UserLoginResource::findUser($userData);
-            $this->response = [ 'successCode' => 201, 'userInformation' => $userInformation ];
+            $userInformation = $loginResource->findUser($userData);
+            $this->response = $authorize;
         } else {
             $this->response = ['errorCode' => 401, 'errorMessage' =>  $authorize];
         }
