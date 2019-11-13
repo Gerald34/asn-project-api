@@ -7,6 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Http\Resources\FirebaseResource as Firebase;
+use Illuminate\Http\Request;
 
 class FeedPostsResource extends JsonResource
 {
@@ -14,7 +15,6 @@ class FeedPostsResource extends JsonResource
 
     /**
      * Fetch user feed object
-     *
      * @param $uid
      * @return array
      */
@@ -26,7 +26,7 @@ class FeedPostsResource extends JsonResource
         // Get each user id
         foreach ($posters as $poster) {
             $postInformation = [
-                'avatar' => self::_getUserAvatar($poster->uid),
+                // 'avatar' => self::_getUserAvatar($poster->uid),
                 'feedData' => self::_getFeedPosts($poster->post_id),
                 'userInformation' => self::_getUserInformation($poster->uid)
             ];
@@ -45,10 +45,8 @@ class FeedPostsResource extends JsonResource
     }
 
     /**
-     * Get post user avatar
-     *
      * @param $uid
-     * @return \Illuminate\Support\Collection
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Query\Builder|object|null
      */
     private static function _getUserAvatar($uid)
     {
@@ -88,6 +86,9 @@ class FeedPostsResource extends JsonResource
         return DB::table('post_likes')->where('post_id', $postID)->get();
     }
 
+    /**
+     * @param $postID
+     */
     private static function _getPostComments($postID)
     {
 
@@ -104,33 +105,31 @@ class FeedPostsResource extends JsonResource
     }
 
     /**
-     * Save user post
-     * @param $uid
-     * @param $message
-     * @param $fileNameToStore
+     * @param array $data
+     * @param Request $request
      */
-    public static function postStatusUpdate($uid, $message, $fileNameToStore): void
+    public static function postStatusUpdate(array $data)
     {
-        $postID = self::_generateRandomString();
         FeedPostsModel::insert(
             [
-                'uid' => $uid,
-                'post_id' => $postID,
-                'message' => $message,
-                'image' => $fileNameToStore,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now()
+                'uid' => $data['uid'],
+                'post_id' => $data['postID'],
+                'message' => $data['message'],
+                'image' => $data['fileNameToStore'],
+                'created_at' => $data['created_at'],
+                'updated_at' => $data['updated_at']
             ]
         );
-        FeedPostsModel::where('post_id', $postID)->get();
-        Firebase::userPosts($uid, $message, $fileNameToStore, $postID);
+       FeedPostsModel::where('post_id', $data['postID'])->get();
+
+        return Firebase::userPosts($data);
     }
 
     /**
      * @param int $length
      * @return string
      */
-    private static function _generateRandomString($length = 10)
+    public static function _generateRandomString($length = 10)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\FirebaseResource;
+use App\Http\Resources\ProfileSetupResource;
 use Illuminate\Http\Request;
 use App\Http\Resources\UserRegistrationResource;
 use Illuminate\Support\Facades\Hash;
@@ -23,8 +24,10 @@ class UserRegistrationController extends Controller
         $registration = [];
         if ($request->input('password') === $request->input('confirmPassword')) {
             $registration = [
-                'email' => $request->input('email'),
-                'password' => $request->input('password')
+                'email' => trim(strip_tags($request->input('email'))),
+                'password' => trim(strip_tags($request->input('password'))),
+                'first_name' => trim(strip_tags($request->input('first_name'))),
+                'last_name' => trim(strip_tags($request->input('last_name')))
             ];
         } else {
             $this->response = [
@@ -33,27 +36,14 @@ class UserRegistrationController extends Controller
             ];
         }
 
-        $firebase = FirebaseResource::signup($registration);
-
-        if (isset($firebase->uid)) {
-            $mysqlDatabaseUsers = [
-                'uid' => $firebase->uid,
-                'email' => $firebase->email,
-                'passwordHash' => $firebase->passwordHash,
-                'verification' => $firebase->emailVerified,
-                'disabled' => $firebase->disabled,
-                'created_at' => $firebase->metadata->createdAt,
-                'first_name' => $request->input('first_name'),
-                'last_name' => $request->input('last_name'),
-            ];
-            $registrationResource = new UserRegistrationResource(
-                $resource = ['file' => '../../../asn-sports-firebase-adminsdk-hjyvg-f95e677461.json']
-            );
-            $this->response = $registrationResource::register($mysqlDatabaseUsers);
-        } else {
-            $this->response = $firebase;
-        }
+        $resource = new FirebaseResource($request);
+        $this->response = $resource->signup($registration);
 
         return $this->response;
     }
+
+    public function profile($uid) {
+        return ProfileSetupResource::newProfileSetup($uid);
+    }
+
 }

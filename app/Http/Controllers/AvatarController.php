@@ -41,6 +41,7 @@ class AvatarController extends Controller
         $uid = $request->input('uid');
         $fileNameToStore = [];
         $filePath = '';
+
         if ($request->hasFile('avatar')) {
             // get filename with extension
             $fileNameWithExtension = $request->file('avatar')->getClientOriginalName();
@@ -66,6 +67,15 @@ class AvatarController extends Controller
      */
     public function getAvatarImageFile($uid) {
         $avatar = AvatarResource::getImage($uid);
+        return ($avatar !== null)? $avatar : 'Image not found';
+    }
+
+    /**
+     * @param $uid
+     * @return \Illuminate\Http\Response|string|null
+     */
+    public function getAvatarImageFile2($uid) {
+        $avatar = AvatarResource::getImage2($uid);
         return ($avatar !== null)? $avatar : 'Image not found';
     }
 
