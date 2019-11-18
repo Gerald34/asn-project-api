@@ -13,7 +13,7 @@
  - MySql
 ##### Installation
     git clone https://github.com/Gerald34/asn-project-api.git
-    $ composer.phar install
+    $ composer install
 ##### Migrate required database tables
     $ php artisan migrate    
 

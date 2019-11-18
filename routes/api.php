@@ -78,6 +78,13 @@ Route::group(['prefix' => '1.1.0'], function() {
                 Route::post('post', 'FeedPostsController@postUserPosts');
                 Route::get('postImage/{uid}/{post_id}/{imageName}', 'FeedPostsController@getPostImage');
             });
+
+            Route::group(['prefix' => 'activities'], function() {
+                Route::post('create', 'ActivitiesController@createActivity');
+                Route::get('get/{uid}/{current_team_id}', 'ActivitiesController@getActivities');
+                Route::post('edit', 'ActivitiesController@editActivity');
+                Route::get('delete/{uid}/{activity}', 'ActivitiesController@deleteActivity');
+            });
         });
 
         Route::get('getUserInformation/{id}', 'UserController@getMyInformation');

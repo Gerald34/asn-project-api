@@ -45,7 +45,7 @@ class FirebaseResource extends JsonResource
      */
     public static function teams(array $data): void
     {
-        self::$_firebase = self::setFirebaseObject();
+        self::$_firebase = HelperResource::initFirebaseObject();
         $database = self::$_firebase->getDatabase();
         $database->getReference('teams/' . $data['team_id'])->set(
             [
