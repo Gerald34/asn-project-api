@@ -46,7 +46,7 @@ class ActivitiesResource extends JsonResource
             'current_team_id' => $current_team_id,
             'challenger_id' => $challenger_id,
             'venue' => $venue,
-            'match_date' => $activity_date,
+            'match_date' => Carbon::now(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
@@ -59,12 +59,11 @@ class ActivitiesResource extends JsonResource
      */
     public static function getActivityCollectionByID(string $uid, string $current_team_id) {
         $collection =  ActivitiesModel::where([
-                ['uid', '=', $uid],
                 ['current_team_id', '=', $current_team_id]
             ]
-        )->get();
+        )->orderByRaw('created_at DESC')->get();
 
-        return response($collection, 302)
+        return response($collection, 200)
             ->header('Content-Type', 'text/json');
     }
 
@@ -74,10 +73,16 @@ class ActivitiesResource extends JsonResource
         }
     }
 
-    public static function delete(string $uid, string $activity): void {
+    public static function delete(string $uid, string $activity, $teamID) {
         ActivitiesModel::where([
-            ['uid', '=', $uid],
             ['activity_id', '=', $activity]
         ])->delete();
+
+        $collection =  ActivitiesModel::where([
+                ['current_team_id', '=', $teamID]
+            ]
+        )->orderByRaw('created_at DESC')->get();
+
+        return $collection;
     }
 }

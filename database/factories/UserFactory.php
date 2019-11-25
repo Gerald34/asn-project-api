@@ -1,7 +1,6 @@
 <?php
 
 use Faker\Generator as Faker;
-
 /*
 |--------------------------------------------------------------------------
 | Model Factories
@@ -12,7 +11,7 @@ use Faker\Generator as Faker;
 | model instances for testing / seeding your application's database.
 |
 */
-
+$factory = new Factory;
 $factory->define(App\User::class, function (Faker $faker) {
     return [
         'name' => $faker->name,

@@ -83,7 +83,7 @@ Route::group(['prefix' => '1.1.0'], function() {
                 Route::post('create', 'ActivitiesController@createActivity');
                 Route::get('get/{uid}/{current_team_id}', 'ActivitiesController@getActivities');
                 Route::post('edit', 'ActivitiesController@editActivity');
-                Route::get('delete/{uid}/{activity}', 'ActivitiesController@deleteActivity');
+                Route::get('delete/{uid}/{activity}/{teamID}', 'ActivitiesController@deleteActivity');
             });
         });
 
@@ -111,3 +111,4 @@ Route::group(['prefix' => '1.1.0'], function() {
 });
 
 Route::get('profile/{uid}', 'UserRegistrationController@profile');
+Route::get('get_venues', 'AuthorizedVenuesController@getAllVenues');

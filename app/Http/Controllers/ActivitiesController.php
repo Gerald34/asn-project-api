@@ -52,8 +52,7 @@ class ActivitiesController extends Controller
         return response('Activity edited', 201)->header('Content-Type', 'text/plain');
     }
 
-    public function deleteActivity($uid, $activity) {
-        ActivitiesResource::delete($uid, $activity);
-        return response('Activity deleted', 202)->header('Content-Type', 'text/plain');
+    public function deleteActivity($uid, $activity, $teamID) {
+        return ActivitiesResource::delete($uid, $activity, $teamID);
     }
 }

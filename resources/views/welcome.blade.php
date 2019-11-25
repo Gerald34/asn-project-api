@@ -1,3 +1,4 @@
+<!-- Stored in resources/views/login.blade.php -->
 <!doctype html>
 <html lang="{{ app()->getLocale() }}">
     <head>
@@ -17,12 +18,12 @@
         <img src="/images/2397.jpg" class="img-fluid"/>
     </div>
         <div class="flex-center position-ref full-height">
-            @if (Route::has('login'))
+            @if (Route::has('developer'))
                 <div class="top-right links">
                     @auth
-                        <a href="{{ url('/home') }}">Home</a>
+                        <a href="{{ url('/') }}">Home</a>
                     @else
-                        <a href="{{ route('login') }}">authorise</a>
+                        <a href="{{ route('developer') }}">authorise</a>
                     @endauth
                 </div>
             @endif
@@ -37,6 +38,7 @@
                 </div>
 
                 <div class="links">
+                    <a href="#">Developer Administrator</a>
                     <a href="https://github.com/Gerald34/asn-project-api" target="_blank">API Documentation</a>
                     <a href="#" target="_blank">Production Environment</a>
                     <a href="#" target="_blank">Stage Environment</a>
