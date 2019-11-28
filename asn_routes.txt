@@ -1,38 +1,3 @@
-<p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
-
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-</p>
-
-### ASN Prototype API Documentation
-##### Built with the [Laravel Framework](https://laravel.com) version 5.8.11.
-##### Requirements
- - Language ``PHP verion 7.3.9`` 
- - Git
- - Composer
- - MySql
- - .env with MySQL database credentials. ``Get from application owner/head developer``
-##### Installation
-
- > Clone the source code on to your local host and checkout development branch.
-````
-$ git clone https://github.com/Gerald34/asn-project-api.git
-$ git fetch origin
-$ git checkout development
-````
-- Now install all required dependencies.
-````
-$ composer install
-````
-- Migrate required database tables.
-```
-$ php artisan migrate
-````
-- Request URI and methods
-
-> Base route/Domain: ``http://api.asn.com/public/index.php/``
-
-````
 +--------+----------------------------------------+--------------------------------------------------------------------+-----------------------+---------------------------------------------------------------+------------------------------------------------------+
 | Domain | Method                                 | URI                                                                | Name                  | Action                                                        | Middleware                                           |
 +--------+----------------------------------------+--------------------------------------------------------------------+-----------------------+---------------------------------------------------------------+------------------------------------------------------+
@@ -80,12 +45,3 @@ $ php artisan migrate
 |        | GET|HEAD                               | api/user                                                           |                       | Closure                                                       | api,auth:api                                         |
 |        | GET|HEAD                               | developer                                                          |                       | Closure                                                       | web                                                  |
 +--------+----------------------------------------+--------------------------------------------------------------------+-----------------------+---------------------------------------------------------------+------------------------------------------------------+
-````
-
-##### Security Vulnerabilities
-
-If you discover a security vulnerability within this api, please send an e-mail to Gerald Mathabela via [code45dev@gmail.com](mailto:code45dev@gmail.com). All security vulnerabilities will be promptly addressed.
-
-##### License
-
-The ASN Prototype API is private software licensed under the [MIT license](https://opensource.org/licenses/MIT).
