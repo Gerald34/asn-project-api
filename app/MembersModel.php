@@ -12,8 +12,8 @@ use Illuminate\Database\Query\Builder;
  */
 class MembersModel extends Model
 {
-    public $table = "team_members";
-    public $fillable = [
+    public string $table = "team_members";
+    public array $fillable = [
         'uid',
         'team_id',
         'active',

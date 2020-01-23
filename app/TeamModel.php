@@ -6,13 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class TeamModel extends Model
 {
-    public $table = "teams";
+    public string $table = "teams";
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = [
+    protected array $fillable = [
         'id',
         'uid',
         'owner',

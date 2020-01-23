@@ -13,13 +13,13 @@ use Illuminate\Database\Query\Builder;
  */
 class MyInformationModel extends Model
 {
-    public $table = "user_profile";
+    public string $table = "user_profile";
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = [
+    protected array $fillable = [
         'id',
         'uid',
         'current_city',

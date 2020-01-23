@@ -25,7 +25,7 @@ class UserLoginResource extends JsonResource
      * @param array $userData
      * @return Model|Builder|object|null
      */
-    public function findUser(array $userData)
+    public static function findUser(array $userData)
     {
         UserLoginModel::where('uid', $userData['uid'])
             ->update(['last_login' => $userData['last_login']]);

@@ -9,10 +9,29 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\User as Authentication;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
-class UserController extends Controller
+class UserController extends Authentication implements JWTSubject
 {
-    private $response;
+    private array $response;
+
+    public function authenticate(Request $request) {
+        $credentials = $request->only('email', 'password');
+
+        try {
+            if (! $token = auth()->attempt($credentials)) {
+                return response()->json(['error' => 'invalid_credentials'], 400);
+            }
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'could_not_create_token'], 500);
+        }
+
+        return response()->json(compact('token'));
+    }
 
     public function registeredUsers() {
         return DB::table('users')->get();
@@ -86,6 +105,14 @@ class UserController extends Controller
         }
 
         return $this->response;
+    }
+
+    public function getJWTIdentifier() {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims() {
+        return [];
     }
 
 }

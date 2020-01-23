@@ -6,13 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class AvatarModel extends Model
 {
-    public $table = "avatars";
+    public string $table = "avatars";
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = [
+    protected array $fillable = [
         'id',
         'uid',
         'avatar',

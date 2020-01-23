@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserFollowersModel extends Model
 {
-    public $table = "user_followers";
-    protected $fillable = [
+    public string $table = "user_followers";
+    protected array $fillable = [
         'uid',
         'owner',
         'follower_id',

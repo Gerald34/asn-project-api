@@ -12,13 +12,13 @@ use Illuminate\Database\Query\Builder;
  */
 class FeedPostsModel extends Model
 {
-    public $table = "posts";
+    public string $table = "posts";
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = [
+    protected array $fillable = [
         'id',
         'uid',
         'message',

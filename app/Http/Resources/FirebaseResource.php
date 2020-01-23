@@ -3,7 +3,7 @@
 namespace App\Http\Resources;
 
 // Helper
-use App\Http\Resources\HelperResource;
+// use App\Http\Resources\HelperResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Kreait\Firebase\Exception\Auth\UserNotFound;
 use Kreait\Firebase\Exception\Auth\InvalidPassword;
@@ -12,8 +12,9 @@ use App\Http\Resources\UserRegistrationResource;
 use Illuminate\Support\Facades\Hash;
 class FirebaseResource extends JsonResource
 {
-    public static $_firebase;
-    public static $response;
+    public static object $_firebase;
+    public static array $response;
+    public static string $exception;
 
     public function __construct($resource)
     {
@@ -23,8 +24,7 @@ class FirebaseResource extends JsonResource
     /**
      * @param $data
      */
-    public static function realtimeDatabase($data)
-    {
+    public static function realtimeDatabase(array $data): void {
         self::$_firebase = HelperResource::initFirebaseObject();
         $database = self::$_firebase->getDatabase();
         $database->getReference('users/' . $data->uid)->set(
@@ -115,19 +115,19 @@ class FirebaseResource extends JsonResource
      * @param array $registration
      * @return array|string
      */
-    public function signup(array $registration)
+    public static function signup(array $registration)
     {
         self::$_firebase = HelperResource::initFirebaseObject();
-
         // Check user exists / Fetch user by email
         if (HelperResource::firebaseUserByEmail($registration['email']) == true) {
             // User with email found
             self::$response = [
                 'errorCode' => 405,
-                'errorMessage' => 'User with email: ' . $registration['email'] . ' already exists.'
+                'errorMessage' => 'Account with email: ' . $registration['email'] . ' already exists.'
             ];
         } else {
-            self::$response = $this->_createUserAccount($registration);
+            self::$response = self::_createUserAccount($registration);
+            HelperResource::initFirebaseObject()->getAuth()->sendEmailVerificationLink($registration['email']);
         }
 
         return self::$response;
@@ -137,7 +137,7 @@ class FirebaseResource extends JsonResource
      * @param array $userData
      * @return mixed
      */
-    protected function _createUserAccount(array $userData)
+    protected static function _createUserAccount(array $userData)
     {
         self::$_firebase = HelperResource::initFirebaseObject();
         // Create new user account
@@ -160,11 +160,12 @@ class FirebaseResource extends JsonResource
         ];
 
         $create = UserRegistrationResource::register($mysqlDatabaseUsers, Hash::make($userData['password']));
+        return $create;
         if (isset($create['successCode'])):
             // verify new user email address
             self::$_firebase->getAuth()->sendEmailVerification($newUser->uid);
             ProfileSetupResource::newProfileSetup($newUser->uid);
-            self::$response = $this->login($userData['email'], $userData['password']);
+            self::$response = self::login($userData['email'], $userData['password']);
         else:
             self::$response = $create;
         endif;
@@ -177,7 +178,7 @@ class FirebaseResource extends JsonResource
      * @param string $password
      * @return mixed
      */
-    public function login(string $email, string $password)
+    public static function login(string $email, string $password)
     {
         self::$_firebase = HelperResource::initFirebaseObject();
 
@@ -193,11 +194,11 @@ class FirebaseResource extends JsonResource
                 ]
             ];
         } catch (InvalidPassword $e) {
-            self::$response = $e->getMessage();
+            self::$response = ['response' => $e->getMessage()];
         } catch (EmailNotFound $e) {
-            self::$response = $e->getMessage();
+            self::$response = ['response' => $e->getMessage()];
         } catch (UserNotFound $e) {
-            self::$response = $e->getMessage();
+            self::$response = ['response' => $e->getMessage()];
         }
 
         return self::$response;

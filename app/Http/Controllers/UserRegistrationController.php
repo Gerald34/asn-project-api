@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Resources\FirebaseResource;
 use App\Http\Resources\ProfileSetupResource;
 use Illuminate\Http\Request;
-use App\Http\Resources\UserRegistrationResource;
-use Illuminate\Support\Facades\Hash;
 
 /**
  * Class UserRegistrationController
@@ -14,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
  */
 class UserRegistrationController extends Controller
 {
-    private $response;
+    private object $response;
 
     /**
      * @param Request $request
@@ -30,14 +28,13 @@ class UserRegistrationController extends Controller
                 'last_name' => trim(strip_tags($request->input('last_name')))
             ];
         } else {
-            $this->response = [
+            $this->response = response()->json([
                 'errorCode' => 505,
                 'errorMessage' => 'Passwords do not match...'
-            ];
+            ], 401);
         }
 
-        $resource = new FirebaseResource($request);
-        $this->response = $resource->signup($registration);
+        $this->response = response()->json(FirebaseResource::signup($registration), 200);
 
         return $this->response;
     }

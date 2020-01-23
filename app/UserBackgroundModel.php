@@ -6,13 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserBackgroundModel extends Model
 {
-        public $table = "user_background";
+        public string $table = "user_background";
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = [
+    protected array $fillable = [
         'id',
         'uid',
         'background',

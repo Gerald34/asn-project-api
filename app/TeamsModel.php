@@ -12,8 +12,8 @@ use Illuminate\Database\Query\Builder;
  */
 class TeamsModel extends Model
 {
-    public $table = "teams";
-    protected $fillable = [
+    public string $table = "teams";
+    protected array $fillable = [
         'uid',
         'owner',
         'team_name',
