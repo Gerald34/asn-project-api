@@ -22,6 +22,7 @@ Route::group(['prefix' => 'app'], function () {
     Route::post('login', 'UserLoginController@login');
     Route::post('register', 'UserRegistrationController@register');
 
+    // All middleware protected routes
     Route::group(['middleware' => ['jwt.verify']], function ($router) {
 
         Route::get('registered_users/{uid}', 'AppEngineController@registeredUsers');
@@ -99,6 +100,14 @@ Route::group(['prefix' => 'app'], function () {
             Route::post('/create', 'TeamController@create');
         });
     });
+
+    // Open routes
+    Route::group(['prefix' => 'avatar'], function () {
+        Route::get('getCurrent/{uid}', 'AvatarController@getCurrent');
+        Route::get('get/{uid}', 'AvatarController@getAvatarImageFile');
+    });
+
+    Route::get('postImage/{uid}/{post_id}/{imageName}', 'FeedPostsController@getPostImage');
 });
 
 

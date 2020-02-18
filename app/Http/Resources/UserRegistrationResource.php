@@ -20,24 +20,24 @@ class UserRegistrationResource extends JsonResource implements JWTSubject
     /**
      * @param array $registration
      * @param string $hashedPassword
-     * @return array
+     * @return object
      */
-    public static function register(array $registration, string $hashedPassword)
-    {
+    public static function register(array $registration, string $hashedPassword) {
         return self::saveRegistration($registration, $hashedPassword);
     }
 
     /**
      * @param array $registration
      * @param string $hashedPassword
-     * @return array
+     * @return object
      */
-    private static function saveRegistration(array $registration, string $hashedPassword)
-    {
+    private static function saveRegistration(array $registration, string $hashedPassword): object {
+        // check if user exists
         $check = Users::where('email', $registration['email'])->first();
         if ($check !== null) {
             self::$response = ['errorCode' => 201, 'errorMessage' => 'User Exists'];
         } else {
+            // create new user record
             Users::create([
                 'uid' => $registration['uid'],
                 'email' => $registration['email'],
@@ -49,8 +49,8 @@ class UserRegistrationResource extends JsonResource implements JWTSubject
                 'updated_at' => Carbon::now(),
                 'created_at' => $registration['created_at'],
             ]);
-            $token = auth()->fromUser($registration);
-            return $token;
+            // $token = auth()->fromUser($registration);
+            // return $token;
             self::setDefaultAvatar($registration['uid'], 'default.jpg');
             self::_setDefaultBackground($registration['uid'], 'default.jpg');
             $user = Users::select('uid', 'verification', 'first_name', 'last_name')
@@ -66,9 +66,13 @@ class UserRegistrationResource extends JsonResource implements JWTSubject
             ];
         }
 
-        return self::$response;
+        return response()->json(self::$response);
     }
 
+    /**
+     * @param string $uid
+     * @param string $avatar
+     */
     private static function setDefaultAvatar(string $uid, string $avatar): void {
         AvatarModel::create([
             'uid' => $uid,
@@ -78,6 +82,10 @@ class UserRegistrationResource extends JsonResource implements JWTSubject
         ]);
     }
 
+    /**
+     * @param string $uid
+     * @param string $background
+     */
     private static function _setDefaultBackground(string $uid, string $background): void {
         UserBackgroundModel::create([
             'uid' => $uid,
@@ -87,14 +95,23 @@ class UserRegistrationResource extends JsonResource implements JWTSubject
         ]);
     }
 
+    /**
+     * @return mixed
+     */
     public function getJWTIdentifier() {
         return $this->getKey();
     }
 
+    /**
+     * @return array
+     */
     public function getJWTCustomClaims() {
         return [];
     }
 
+    /**
+     * @param $password
+     */
     public function setPasswordAttribute($password)
     {
         if ( !empty($password) ) {

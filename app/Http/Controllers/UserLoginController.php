@@ -8,6 +8,7 @@ use App\Http\Resources\FirebaseResource;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Support\Facades\Auth;
 use Exception;
+
 class UserLoginController extends Controller implements JWTSubject
 {
     private static object $response;
@@ -17,14 +18,16 @@ class UserLoginController extends Controller implements JWTSubject
      * @param Request $request
      * @return object
      */
-    public function login(Request $request): object {
+    public function login(Request $request): object
+    {
         $email = trim(strip_tags($request->input('email')));
         $password = trim(strip_tags($request->input('password')));
 
         // Firebase authentication
         $authorize = FirebaseResource::login($email, $password);
-        if(!isset($authorize['userInformation']['uid'])) {
-            self::$response = response()->json(['error' => 401, 'message' =>  'User not found, please create account'], 406);
+
+        if (!isset($authorize['userInformation']['uid'])) {
+            self::$response = response()->json(['error' => 401, 'message' => 'User not found, please create account'], 200);
         } else {
             // check if user email is verified
             if ($authorize['userInformation']['emailVerified'] !== true) {
@@ -41,14 +44,11 @@ class UserLoginController extends Controller implements JWTSubject
                             'uid' => $authorize['userInformation']['uid'],
                             'last_login' => $authorize['userInformation']['lastLoginAt']
                         ]);
-                        self::$response = response()->json(['user' => $authorize, 'authentication' => [
-                            'token' => $token,
-                            'token_type' => 'bearer',
-                            // 'expires_in' => $this->guard()->factory()->getTTL() * 60
-                        ]
-                        ], 200);
+
+                        array_push($authorize, ['token' => $token, 'token_type' => 'bearer']);
+                        self::$response = response()->json($authorize, 200);
                     }
-                } catch(Exception $e) {
+                } catch (Exception $e) {
                     self::$response = response()->json(['response' => 'could not create token'], 500);
                 }
             }
@@ -57,21 +57,24 @@ class UserLoginController extends Controller implements JWTSubject
         return self::$response;
     }
 
-    public function logout($token) {
+    public function logout($token)
+    {
 
     }
 
-    public function getJWTIdentifier() {
+    public function getJWTIdentifier()
+    {
         return $this->getKey();
     }
 
-    public function getJWTCustomClaims() {
+    public function getJWTCustomClaims()
+    {
         return [];
     }
 
     public function setPasswordAttribute($password)
     {
-        if ( !empty($password) ) {
+        if (!empty($password)) {
             $this->attributes['password'] = bcrypt($password);
         }
     }
