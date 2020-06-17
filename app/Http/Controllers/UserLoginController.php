@@ -9,8 +9,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Support\Facades\Auth;
 use Exception;
 
-class UserLoginController extends Controller implements JWTSubject
-{
+class UserLoginController extends Controller implements JWTSubject {
     private static object $response;
 
     /**
@@ -37,7 +36,7 @@ class UserLoginController extends Controller implements JWTSubject
                 try {
                     if (!$token) {
                         // authorize user credentials
-                        self::$response = response()->json(['error' => 'unauthorized access'], 401);
+                        self::$response = response()->json(['error' => 'unauthorized access', 'token' => $token], 401);
                     } else {
                         // update user login time
                         UserLoginResource::findUser($userData = [

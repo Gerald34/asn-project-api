@@ -40,6 +40,7 @@ Route::group(['prefix' => 'app'], function () {
                 Route::get('get/{uid}', 'TeamsController@getTeam');
                 Route::post('remove', 'TeamsController@removeExistingTeamByUID');
                 Route::post('edit', 'TeamsController@editTeamByOwnership');
+                Route::get('events/{uid}/{teamID}/{eventType}', 'TeamController@getTeamEvents');
             });
 
             // User profile information

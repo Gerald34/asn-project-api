@@ -8,10 +8,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use App\TeamModel;
 use App\MembersModel;
 use Illuminate\Support\Facades\DB;
+
 class TeamResource extends JsonResource
 {
 
-    private static $response;
+    private static object $response;
+
     public static function createNewTeam($teamData) {
         $exists = TeamModel::where('uid', $teamData['uid'])->first();
         if ($exists === null) {

@@ -33,6 +33,10 @@ class UserLoginModel extends Model implements JWTSubject
     ];
 
     /**
+     * @var string
+     */
+    protected $primaryKey = 'id';
+    /**
      * The attributes that should be hidden for arrays.
      *
      * @var array
@@ -41,11 +45,17 @@ class UserLoginModel extends Model implements JWTSubject
         'password', 'remember_token',
     ];
 
+    /**
+     * @return mixed
+     */
     public function getJWTIdentifier()
     {
         return $this->getKey();
     }
 
+    /**
+     * @return array
+     */
     public function getJWTCustomClaims()
     {
        return [];
