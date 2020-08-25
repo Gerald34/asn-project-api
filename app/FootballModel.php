@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB as Database;
 
 class FootballModel extends Model
 {
@@ -18,4 +19,5 @@ class FootballModel extends Model
         'created_at',
         'updated_at'
     ];
+
 }

@@ -42,14 +42,22 @@ class TeamController extends Controller {
         return TeamResource::getCategories();
     }
 
-    public function getTeamEvents($uid, $teamID, $eventType): object {
+    public function getTeamEvents($uid, $eventType): object {
         switch($eventType) {
             case 1:
-                $this->jsonResponse = FootballResource::teamEvents($uid, $teamID);
+                $this->jsonResponse = FootballResource::teamEvents($uid);
                 break;
             default:
                 $this->jsonResponse = response()->json(['error' => 304, 'message' => 'Activity type not recognized']);
         }
         return $this->jsonResponse;
+    }
+
+    public function getActivity($activity) {
+        return FootballResource::getActivityData($activity);
+    }
+
+    public function getTeamMainFlag($teamID) {
+        return TeamResource::getTeamFlag($teamID);
     }
 }

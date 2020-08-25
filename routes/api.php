@@ -40,7 +40,8 @@ Route::group(['prefix' => 'app'], function () {
                 Route::get('get/{uid}', 'TeamsController@getTeam');
                 Route::post('remove', 'TeamsController@removeExistingTeamByUID');
                 Route::post('edit', 'TeamsController@editTeamByOwnership');
-                Route::get('events/{uid}/{teamID}/{eventType}', 'TeamController@getTeamEvents');
+                Route::get('events/{uid}/{eventType}', 'TeamController@getTeamEvents');
+                Route::get('getActivity/{activity}', 'TeamController@getActivity');
             });
 
             // User profile information
@@ -109,6 +110,11 @@ Route::group(['prefix' => 'app'], function () {
     });
 
     Route::get('postImage/{uid}/{post_id}/{imageName}', 'FeedPostsController@getPostImage');
+
+    Route::group(['prefix' => 'team'], function() {
+        Route::get('getActivity/{activity}', 'TeamController@getActivity');
+        Route::get('flag/{teamID}', 'TeamController@getTeamMainFlag');
+    });
 });
 
 
