@@ -2,15 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\UserRolesModel;
 use Illuminate\Http\Request;
 use App\Http\Resources\UserLoginResource;
 use App\Http\Resources\FirebaseResource;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Support\Facades\Auth;
+use App\UserLoginModel;
 use Exception;
 
 class UserLoginController extends Controller implements JWTSubject {
     private static object $response;
+
+    public function index() {
+        return UserLoginModel::all();
+    }
 
     /**
      * Firebase authentication first and fetching data from MySQL database on success
@@ -43,8 +49,8 @@ class UserLoginController extends Controller implements JWTSubject {
                             'uid' => $authorize['userInformation']['uid'],
                             'last_login' => $authorize['userInformation']['lastLoginAt']
                         ]);
-
-                        array_push($authorize, ['token' => $token, 'token_type' => 'bearer']);
+                        $role = UserRolesModel::where('uid', $authorize['userInformation']['uid'])->first();
+                        $authorize['auth'] = ['token' => $token, 'token_type' => 'bearer', 'role' => $role->role];
                         self::$response = response()->json($authorize, 200);
                     }
                 } catch (Exception $e) {

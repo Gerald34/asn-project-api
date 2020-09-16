@@ -1,4 +1,5 @@
- * {
+@import url('node_modules/bootstrap/dist/css/bootstrap.css');
+* {
      -webkit-font-smoothing: antialiased;
      -moz-osx-font-smoothing: grayscale;
  }
@@ -6,7 +7,7 @@
  html,
  body {
      background-color: #fff;
-     color: #fdfdfd;
+     color: #444;
      font-weight: 200;
      height: 100vh;
      margin: 0;

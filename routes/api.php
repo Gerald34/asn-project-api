@@ -117,6 +117,16 @@ Route::group(['prefix' => 'app'], function () {
     });
 });
 
-
 Route::get('profile/{uid}', 'UserRegistrationController@profile');
 Route::get('get_venues', 'AuthorizedVenuesController@getAllVenues');
+
+// Administrator Portal
+Route::group(['prefix' => 'administrator'], function() {
+    Route::group(['prefix' => 'authentication'], function() {
+        Route::post('signin', 'UserLoginController@login');
+    });
+});
+
+Route::get('test', function() {
+    return 'Passed';
+});

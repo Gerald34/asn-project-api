@@ -19,7 +19,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\TrustProxies::class,
-        \Barryvdh\Cors\HandleCors::class,
+        // \Barryvdh\Cors\HandleCors::class,
     ];
 
     /**
@@ -27,7 +27,7 @@ class Kernel extends HttpKernel
      *
      * @var array
      */
-    protected array $middlewareGroups = [
+    protected $middlewareGroups = [
         'web' => [
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
@@ -41,8 +41,12 @@ class Kernel extends HttpKernel
         'api' => [
             'throttle:60,1',
             'bindings',
-            \Barryvdh\Cors\HandleCors::class,
+            \Fruitcake\Cors\HandleCors::class
+            // \Barryvdh\Cors\HandleCors::class,
         ],
+        'cors' => [
+            \Fruitcake\Cors\HandleCors::class
+        ]
     ];
 
     /**
@@ -52,7 +56,7 @@ class Kernel extends HttpKernel
      *
      * @var array
      */
-    protected array $routeMiddleware = [
+    protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,

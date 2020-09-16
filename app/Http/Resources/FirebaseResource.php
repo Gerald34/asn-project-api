@@ -15,7 +15,7 @@ use Google\Cloud\Storage\StorageClient;
 class FirebaseResource extends JsonResource
 {
     public static object $_firebase;
-    public static array $response;
+    public static $response;
     public static string $exception;
 
     public function __construct($resource)
@@ -183,9 +183,8 @@ class FirebaseResource extends JsonResource
     public static function login(string $email, string $password)
     {
         self::$_firebase = HelperResource::initFirebaseObject();
-
         try {
-            $verify = self::$_firebase->getAuth()->verifyPassword($email, $password);
+            $verify= self::$_firebase->getUserByEmail($email);
             self::$response = [
                 'successCode' => 201,
                 'userInformation' => [

@@ -12,13 +12,13 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  */
 class UserLoginModel extends Model implements JWTSubject
 {
-    public string $table = "users";
+    public $table = "users";
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected array $fillable = [
+    protected $fillable = [
         'uid',
         'verification',
         'disabled',
@@ -41,7 +41,7 @@ class UserLoginModel extends Model implements JWTSubject
      *
      * @var array
      */
-    protected array $hidden = [
+    protected $hidden = [
         'password', 'remember_token',
     ];
 

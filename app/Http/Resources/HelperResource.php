@@ -6,7 +6,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Config;
 use Kreait\Firebase\Exception\Auth\UserNotFound;
 use Kreait\Firebase\Factory;
-use Kreait\Firebase\ServiceAccount;
 
 class HelperResource extends JsonResource
 {
@@ -27,10 +26,8 @@ class HelperResource extends JsonResource
      * @return object
      */
     public static function initFirebaseObject() {
-        return (new Factory)
-            ->withServiceAccount(ServiceAccount::fromJsonFile(__DIR__ . '/../../../' . Config::get('constants.firebase')))
-            ->withDatabaseUri(Config::get('constants.firebase_database'))
-            ->create();
+        return (new Factory)->withServiceAccount(__DIR__ . '/../../../' . Config::get('constants.firebase'))
+            ->withDatabaseUri(Config::get('constants.firebase_database'))->createAuth();
     }
 
     /**
