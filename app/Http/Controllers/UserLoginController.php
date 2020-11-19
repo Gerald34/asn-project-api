@@ -13,6 +13,7 @@ use Exception;
 
 class UserLoginController extends Controller implements JWTSubject {
     private static object $response;
+    private $attributes;
 
     public function index() {
         return UserLoginModel::all();
@@ -36,13 +37,13 @@ class UserLoginController extends Controller implements JWTSubject {
         } else {
             // check if user email is verified
             if ($authorize['userInformation']['emailVerified'] !== true) {
-                self::$response = response()->json(['error' => "Email not verified, Verification link sent to {$authorize['userInformation']['email']}."], 401);
+                self::$response = response()->json(['error' => "Email not verified, Verification link sent to {$authorize['userInformation']['email']}."], 200);
             } else {
                 $token = auth('api')->attempt($credentials = ['email' => $email, 'password' => $password]);
                 try {
                     if (!$token) {
                         // authorize user credentials
-                        self::$response = response()->json(['error' => 'unauthorized access', 'token' => $token], 401);
+                        self::$response = response()->json(['error' => true, 'message' => 'unauthorized access', 'token' => $token], 200);
                     } else {
                         // update user login time
                         UserLoginResource::findUser($userData = [
@@ -54,7 +55,7 @@ class UserLoginController extends Controller implements JWTSubject {
                         self::$response = response()->json($authorize, 200);
                     }
                 } catch (Exception $e) {
-                    self::$response = response()->json(['response' => 'could not create token'], 500);
+                    self::$response = response()->json(['error' => true, 'response' => 'could not create token', 'message' => $e->getMessage()], 500);
                 }
             }
         }

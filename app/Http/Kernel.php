@@ -20,6 +20,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\TrustProxies::class,
         // \Barryvdh\Cors\HandleCors::class,
+        \Fruitcake\Cors\HandleCors::class
     ];
 
     /**
@@ -44,9 +45,9 @@ class Kernel extends HttpKernel
             \Fruitcake\Cors\HandleCors::class
             // \Barryvdh\Cors\HandleCors::class,
         ],
-        'cors' => [
-            \Fruitcake\Cors\HandleCors::class
-        ]
+//        'cors' => [
+//            \Fruitcake\Cors\HandleCors::class
+//        ]
     ];
 
     /**
