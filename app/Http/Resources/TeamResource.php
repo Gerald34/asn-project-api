@@ -8,10 +8,14 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use App\TeamModel;
 use App\MembersModel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Response;
+
 class TeamResource extends JsonResource
 {
 
-    private static $response;
+    private static object $response;
+
     public static function createNewTeam($teamData) {
         $exists = TeamModel::where('uid', $teamData['uid'])->first();
         if ($exists === null) {
@@ -27,15 +31,15 @@ class TeamResource extends JsonResource
                 'updated_at' => $teamData['updated_at']
             ]);
             FirebaseResource::teams($teamData);
-            self::$response = [
+            self::$response = response()->json([
                 'responseCode' => 200,
                 'data' => TeamModel::where('uid', $teamData['uid'])->get()
-            ];
+            ]);
         } else {
-            self::$response = [
+            self::$response = response()->json([
                 'responseCode' => 304,
                 'responseMessage' => 'A team with your user id already exists. Cannot create more than one team.'
-            ];
+            ]);
         }
 
         return self::$response;
@@ -63,6 +67,27 @@ class TeamResource extends JsonResource
 
     public static function getCategories() {
         return DB::table('sports_category')->get();
+    }
+
+    /**
+     * @param $teamID
+     * @return \Illuminate\Http\Response|object|null
+     */
+    public static function getTeamFlag($teamID) {
+        $display_image = DB::table('team_display_images')
+            ->select('display_image')->where('team_id', $teamID)->first();
+        if (empty($display_image)) {
+            self::$response = null;
+        } else {
+            $path = storage_path('app/teams/' . $teamID . '/display_image/' . $display_image->display_image);
+            if (!File::exists($path)) { abort(404); }
+            $file = File::get($path);
+            $type = File::mimeType($path);
+            self::$response = Response::make($file, 200);
+            self::$response->header("Content-Type", $type);
+        }
+
+        return self::$response;
     }
 
 }

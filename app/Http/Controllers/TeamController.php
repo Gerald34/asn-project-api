@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\FootballResource;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Resources\TeamResource;
 use App\Http\Resources\GeneratorResource;
-class TeamController extends Controller
-{
-    //
+
+class TeamController extends Controller {
+    public object $jsonResponse;
 
     public function create(Request $request) {
         $teamData = [
@@ -39,5 +40,24 @@ class TeamController extends Controller
 
     public function getCategories() {
         return TeamResource::getCategories();
+    }
+
+    public function getTeamEvents($uid, $eventType): object {
+        switch($eventType) {
+            case 1:
+                $this->jsonResponse = FootballResource::teamEvents($uid);
+                break;
+            default:
+                $this->jsonResponse = response()->json(['error' => 304, 'message' => 'Activity type not recognized']);
+        }
+        return $this->jsonResponse;
+    }
+
+    public function getActivity($activity) {
+        return FootballResource::getActivityData($activity);
+    }
+
+    public function getTeamMainFlag($teamID) {
+        return TeamResource::getTeamFlag($teamID);
     }
 }

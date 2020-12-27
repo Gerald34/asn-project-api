@@ -1,25 +1,55 @@
-
 // Fonts
 @import url('https://fonts.googleapis.com/css?family=Nunito');
-@import url('https://fonts.googleapis.com/css?family=Fira+Sans:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
+@import "node_modules/font-awesome/scss/font-awesome";
+
 // Variables
 @import 'variables';
 
 // Bootstrap
-@import '~bootstrap/scss/bootstrap';
+@import 'node_modules/bootstrap/scss/bootstrap';
+@import 'node_modules/bootstrap-vue/src/index.scss';
 
-.navbar-laravel {
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-}
+// Notifications
+@import '~toastr/toastr';
 
 * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-family: 'Oswald', sans-serif;
 }
 
-html, body {
-    font-family: 'Fira Sans', sans-serif;
-    background: #aaa !important;
+body {
+    background: #fff;
 }
 
+.background {
+    width: 100%;
+    height: 100vh;
+    background-image: url("https://source.unsplash.com/collection/833868/1920x1080");
+    background-size: cover;
+    position: absolute;
+    z-index: 0;
+
+    &:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-image: linear-gradient(
+                to bottom right,
+                rgba(251, 139, 37, 1),
+                rgba(143, 0, 0, 1)
+        );
+        opacity: 0.95;
+    }
+}
+
+.text-light {
+    color: #f9f9f9;
+}
+$primary: #8f0000;
+$secondary: #fb8b25;
+$primaryGrey: #666;

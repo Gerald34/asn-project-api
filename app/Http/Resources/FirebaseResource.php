@@ -10,10 +10,12 @@ use Kreait\Firebase\Exception\Auth\InvalidPassword;
 use Kreait\Firebase\Exception\Auth\EmailNotFound;
 use App\Http\Resources\UserRegistrationResource;
 use Illuminate\Support\Facades\Hash;
+use Google\Cloud\Storage\StorageClient;
+
 class FirebaseResource extends JsonResource
 {
     public static object $_firebase;
-    public static array $response;
+    public static $response;
     public static string $exception;
 
     public function __construct($resource)
@@ -181,9 +183,8 @@ class FirebaseResource extends JsonResource
     public static function login(string $email, string $password)
     {
         self::$_firebase = HelperResource::initFirebaseObject();
-
         try {
-            $verify = self::$_firebase->getAuth()->verifyPassword($email, $password);
+            $verify= self::$_firebase->getUserByEmail($email);
             self::$response = [
                 'successCode' => 201,
                 'userInformation' => [
@@ -204,4 +205,24 @@ class FirebaseResource extends JsonResource
         return self::$response;
     }
 
+    public static function getFlag($teamID) {
+        self::$_firebase = HelperResource::initFirebaseObject();
+        $database = self::$_firebase->getDatabase();
+        $data = $database->getReference('teams/' . $teamID)->getSnapshot();
+        $object = $data->getValue();
+        return self::cloudStorage($object['flag']);
+    }
+
+    private static function cloudStorage($url) {
+        self::$_firebase = HelperResource::initFirebaseObject();
+        // $storage = self::$_firebase->getStorage();
+        $storage = new StorageClient();
+        $bucket = $storage->bucket('gs://asn-sports.appspot.com');
+        $object = $bucket->object($url);
+        $file = $object->downloadToFile($object);
+        var_dump($file);
+        exit();
+        $expiresAt = new \DateTime('tomorrow');
+        return $storage->bucket()->object($url)->signedURL($expiresAt);
+    }
 }

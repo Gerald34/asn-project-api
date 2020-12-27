@@ -12,4 +12,38 @@ const mix = require('laravel-mix');
  */
 
 mix.js('resources/js/app.js', 'public/js')
-   .sass('resources/sass/app.scss', 'public/css');
+    .sass('resources/sass/app.scss', 'public/css')
+    .sass('resources/sass/toastr.scss', 'public/css');
+
+mix.webpackConfig({
+    resolve: {
+        modules: [
+            'node_modules',
+            path.resolve(__dirname, 'resources/assets/js'),
+            path.resolve(__dirname, 'resources/assets/svg'),
+        ]
+    },
+    module: {
+        rules: [{
+            test: /\.svg$/,
+            use: [{
+                loader: 'html-loader',
+                options: {
+                    minimize: true
+                }
+            }]
+        }]
+    }
+});
+
+Mix.listen('configReady', function (config) {
+    const rules = config.module.rules;
+    const targetRegex = /(\.(png|jpe?g|gif)$|^((?!font).)*\.svg$)/;
+
+    for (let rule of rules) {
+        if (rule.test.toString() == targetRegex.toString()) {
+            rule.exclude = /\.svg$/;
+            break;
+        }
+    }
+});

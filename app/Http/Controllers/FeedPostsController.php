@@ -16,9 +16,8 @@ use Spatie\LaravelImageOptimizer\Facades\ImageOptimizer;
  * Class FeedPostsController
  * @package App\Http\Controllers
  */
-class FeedPostsController extends Controller
-{
-    private $response;
+class FeedPostsController extends Controller {
+    private object $response;
 
     /**
      * @param $uid
@@ -36,7 +35,7 @@ class FeedPostsController extends Controller
      * @return \Illuminate\Http\Response
      *
      */
-    public function getPostImage($uid, $post_id,  $imageName) {
+    public function getPostImage($uid, $post_id,  $imageName): object {
         $path = storage_path('app/posts/' . $uid . '/' . $post_id . '/' . $imageName);
         if (!File::exists($path)) { abort(404); }
         $file = File::get($path);
