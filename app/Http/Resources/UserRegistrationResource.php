@@ -1,26 +1,41 @@
 <?php
 
 namespace App\Http\Resources;
-use Illuminate\Http\Resources\Json\JsonResource;
-use App\UserLoginModel as Users;
+use App\UserLoginModel;
+use App\VerificationModel;
 use Carbon\Carbon;
 use App\AvatarModel;
 use App\UserBackgroundModel;
-use App\Http\Resources\ProfileSetupResource;
+use Kreait\Firebase\Exception\DatabaseException;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-use Tymon\JWTAuth\JWTAuth;
+
 /**
  * Class UserRegistrationResource
  * @package App\Http\Resources
  */
-class UserRegistrationResource extends JsonResource implements JWTSubject
-{
+class UserRegistrationResource implements JWTSubject {
     private static array $response;
+    private static VerificationModel $verificationModel;
+    private static UserLoginModel $userRepository;
+
+    /**
+     * UserRegistrationResource constructor.
+     * @param VerificationModel $verificationModel
+     * @param UserLoginModel $userRepository
+     */
+    public function __construct(
+        VerificationModel $verificationModel,
+        UserLoginModel $userRepository
+    ) {
+        self::$verificationModel = $verificationModel;
+        self::$userRepository = $userRepository;
+    }
 
     /**
      * @param array $registration
      * @param string $hashedPassword
-     * @return object
+     * @return array
+     * @throws DatabaseException
      */
     public static function register(array $registration, string $hashedPassword) {
         return self::saveRegistration($registration, $hashedPassword);
@@ -29,16 +44,15 @@ class UserRegistrationResource extends JsonResource implements JWTSubject
     /**
      * @param array $registration
      * @param string $hashedPassword
-     * @return object
+     * @return array
+     * @throws DatabaseException
      */
-    private static function saveRegistration(array $registration, string $hashedPassword): object {
-        // check if user exists
-        $check = Users::where('email', $registration['email'])->first();
+    private static function saveRegistration(array $registration, string $hashedPassword): array {
+        $check = self::$userRepository::where('email', $registration['email'])->first();
         if ($check !== null) {
             self::$response = ['errorCode' => 201, 'errorMessage' => 'User Exists'];
         } else {
-            // create new user record
-            Users::create([
+            self::$userRepository::create([
                 'uid' => $registration['uid'],
                 'email' => $registration['email'],
                 'password' => $hashedPassword,
@@ -53,10 +67,14 @@ class UserRegistrationResource extends JsonResource implements JWTSubject
             // return $token;
             self::setDefaultAvatar($registration['uid'], 'default.jpg');
             self::_setDefaultBackground($registration['uid'], 'default.jpg');
-            $user = Users::select('uid', 'verification', 'first_name', 'last_name')
+            $user = self::$userRepository::select('uid', 'verification', 'first_name', 'last_name')
                 ->where('uid', $registration['uid'])
                 ->first();
-            FirebaseResource::realtimeDatabase($user);
+
+            if ($user) {
+                FirebaseResource::realtimeDatabase($user, 'users/' . $user->uid);
+            }
+
             self::$response = [
                 'successCode' => 202,
                 'successMessage' => 'Profile created successfully.',
@@ -66,7 +84,7 @@ class UserRegistrationResource extends JsonResource implements JWTSubject
             ];
         }
 
-        return response()->json(self::$response);
+        return self::$response;
     }
 
     /**
@@ -96,6 +114,21 @@ class UserRegistrationResource extends JsonResource implements JWTSubject
     }
 
     /**
+     * @param string $uid
+     * @param string $activationCode
+     * @return bool|string
+     */
+    public static function oneTimePinConfirmation(string $uid, string $activationCode): bool {
+        $account = self::$verificationModel::where('uid', $uid)->first();
+        return ($account != null && $account->verification_code === $activationCode) ?
+            FirebaseResource::activate($uid) : false;
+    }
+
+    public static function removeFailedUser(string $uid) {
+
+    }
+
+    /**
      * @return mixed
      */
     public function getJWTIdentifier() {
@@ -112,8 +145,7 @@ class UserRegistrationResource extends JsonResource implements JWTSubject
     /**
      * @param $password
      */
-    public function setPasswordAttribute($password)
-    {
+    public function setPasswordAttribute($password) {
         if ( !empty($password) ) {
             $this->attributes['password'] = bcrypt($password);
         }

@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class GeneratorResource extends JsonResource
+class GeneratorResource
 {
 
     /**
@@ -27,5 +27,13 @@ class GeneratorResource extends JsonResource
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
         return strtolower($randomString);
+    }
+
+    public static function generateOneTimeVerifier() {
+        try {
+            return \random_int(100000, 999999);
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
     }
 }

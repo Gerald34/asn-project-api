@@ -3,37 +3,151 @@
 namespace App\Http\Resources;
 
 // Helper
-// use App\Http\Resources\HelperResource;
-use Illuminate\Http\Resources\Json\JsonResource;
+use Exception;
+use Illuminate\Support\Facades\Config;
 use Kreait\Firebase\Exception\Auth\UserNotFound;
 use Kreait\Firebase\Exception\Auth\InvalidPassword;
 use Kreait\Firebase\Exception\Auth\EmailNotFound;
-use App\Http\Resources\UserRegistrationResource;
 use Illuminate\Support\Facades\Hash;
-use Google\Cloud\Storage\StorageClient;
 
-class FirebaseResource extends JsonResource
-{
-    public static object $_firebase;
-    public static $response;
-    public static string $exception;
+use Kreait\Firebase\Exception\AuthException;
+use Kreait\Firebase\Exception\DatabaseException;
+use Kreait\Firebase\Exception\FirebaseException;
+use Kreait\Firebase\Factory;
+use App\VerificationModel;
+use Kreait\Firebase\Auth\UserRecord;
 
-    public function __construct($resource)
-    {
-        parent::__construct($resource);
+class FirebaseResource {
+    private static object $factory;
+    private static array $response;
+    private static object $database;
+    private static object $auth;
+    private static object $fireStore;
+    private static object $emailResource;
+    private static object $profileSetupResource;
+    private static object $generatorResource;
+    private static object $verificationModel;
+    private static UserRecord $userRecord;
+
+    /**
+     * FirebaseResource constructor.
+     * @param EmailResource $emailResource
+     * @param ProfileSetupResource $profileSetupResource
+     * @param GeneratorResource $generatorResource
+     * @param VerificationModel $verificationModel
+     */
+    public function __construct(
+        EmailResource $emailResource,
+        ProfileSetupResource $profileSetupResource,
+        GeneratorResource $generatorResource,
+        VerificationModel $verificationModel
+    ) {
+        self::$factory = (new Factory)
+            ->withServiceAccount(__DIR__ . '/../../../' . Config::get('constants.firebase'))
+            ->withDatabaseUri(Config::get('constants.firebase_database'));
+        self::$auth = self::$factory->createAuth();
+        self::$database = self::$factory->createDatabase();
+        self::$fireStore = self::$factory->createStorage();
+        self::$emailResource = $emailResource;
+        self::$profileSetupResource = $profileSetupResource;
+        self::$verificationModel = $verificationModel;
+        self::$generatorResource = $generatorResource;
     }
 
     /**
-     * @param $data
+     * @param array $registration
+     * @return array|string
+     * @throws AuthException
+     * @throws DatabaseException
+     * @throws FirebaseException
      */
-    public static function realtimeDatabase(array $data): void {
-        self::$_firebase = HelperResource::initFirebaseObject();
-        $database = self::$_firebase->getDatabase();
-        $database->getReference('users/' . $data->uid)->set(
+    public static function signup(array $registration): array {
+        $exists = self::firebaseUserByEmail($registration['email']);
+        if ($exists) {
+            self::$response = [
+                'error' => true,
+                'success' => false,
+                'message' => 'Account with email: ' . $registration['email'] . ' already exists.'
+            ];
+        } else {
+            self::$response = self::_createUserAccount($registration);
+        }
+        return self::$response;
+    }
+
+    /**
+     * @param array $userData
+     * @return mixed
+     * @throws AuthException
+     * @throws DatabaseException
+     * @throws FirebaseException
+     */
+    protected static function _createUserAccount(array $userData): array {
+        $newFirebaseUser = [
+            'email' => $userData['email'],
+            'emailVerified' => false,
+            'password' => $userData['password'],
+            'displayName' => $userData['first_name'] . ' ' . $userData['last_name'],
+            'disabled' => false,
+        ];
+
+        try {
+            self::$userRecord = self::$auth->createUser($newFirebaseUser);
+        } catch (AuthException $e) {
+            self::$response = ['error' => $e->getMessage()];
+        } catch (FirebaseException $e) {
+            self::$response = ['error' => $e->getMessage()];
+        }
+
+        $mysqlDatabaseUsers = [
+            'uid' => self::$userRecord->uid,
+            'email' => self::$userRecord->email,
+            'verification' => self::$userRecord->emailVerified,
+            'disabled' => self::$userRecord->disabled,
+            'created_at' => self::$userRecord->metadata->createdAt,
+            'first_name' => $userData['first_name'],
+            'last_name' => $userData['last_name']
+        ];
+
+        $create = UserRegistrationResource::register(
+            $mysqlDatabaseUsers, Hash::make($userData['password'])
+        );
+
+        if (isset($create['successCode'])):
+            // verify new user email address
+            $verificationCode = self::$generatorResource::generateOneTimeVerifier();
+            self::$verificationModel::create([
+               'uid' =>  self::$userRecord->uid, 'verification_code' => $verificationCode
+            ]);
+            self::$emailResource->sendVerificationEmail(
+                self::$userRecord->email, $userData['first_name'], $verificationCode
+            );
+            self::$profileSetupResource::newProfileSetup(self::$userRecord->uid);
+            self::$response = self::fetchUserInformation($userData['email'], $userData['password']);
+        else:
+            return $create;
+        endif;
+
+        return self::$response;
+    }
+
+    private function setUserAvatar($uid) {
+
+    }
+
+
+    /**
+     * @param object $data
+     * @param string $path
+     * @throws DatabaseException
+     */
+    public static function realtimeDatabase(object $data, string $path): void {
+        $reference = self::$database->getReference($path);
+        $reference->set(
             [
                 'uid' => $data->uid,
                 'emails' => $data->email,
-                'status' => 1,
+                'status' => 0,
                 'personal_information' => [
                     'first_name' => $data->first_name,
                     'last_name' => $data->last_name,
@@ -44,12 +158,10 @@ class FirebaseResource extends JsonResource
     /**
      * @param array $data
      * @return void
+     * @throws DatabaseException
      */
-    public static function teams(array $data): void
-    {
-        self::$_firebase = HelperResource::initFirebaseObject();
-        $database = self::$_firebase->getDatabase();
-        $database->getReference('teams/' . $data['team_id'])->set(
+    public static function teams(array $data): void {
+        self::$database->getReference('teams/' . $data['team_id'])->set(
             [
                 'uid' => $data['uid'],
                 'owner' => $data['uid'],
@@ -67,12 +179,12 @@ class FirebaseResource extends JsonResource
      * @param string $uid
      * @param string $postID
      * @param array $likeCount
+     * @throws DatabaseException
      */
     public static function updatePostLikes(string $uid, string $postID, array $likeCount)
     {
-        self::$_firebase = HelperResource::initFirebaseObject();
-        $database = self::$_firebase->getDatabase();
-        $database->getReference('posts/' . $postID)->set(
+        $reference = self::$database->getReference('posts/' . $postID);
+        $reference->set(
             [
                 'uid' => $uid,
                 'likeCount' => count($likeCount),
@@ -81,14 +193,11 @@ class FirebaseResource extends JsonResource
 
     /**
      * @param array $data
+     * @throws DatabaseException
      */
-    public static function userPosts(array $data)
-    {
-
-        self::$_firebase = HelperResource::initFirebaseObject();
-        $database = self::$_firebase->getDatabase();
+    public static function userPosts(array $data) {
         // $bucket = $database->uplaod();
-        $database->getReference('posts/' . $data['uid'] . '/' . $data['post_id'])->set(
+        self::$database->getReference('posts/' . $data['uid'] . '/' . $data['post_id'])->set(
             [
                 'uid' => $data['uid'],
                 'post_id' => $data['post_id'],
@@ -103,94 +212,31 @@ class FirebaseResource extends JsonResource
     /**
      * @param $avatar
      */
-    public static function getUserAvatar($avatar)
-    {
-        self::$_firebase = HelperResource::initFirebaseObject();
-
-        $storage = self::$_firebase->getStorage();
-        $bucket = $storage->getBucket();
+    public function getUserAvatar($avatar) {
+        $storage = self::$fireStore->getStorage();
+        $bucket = self::$fireStore->getBucket();
         // Get the default filesystem
-        $filesystem = $storage->getFilesystem();
-    }
-
-    /**
-     * @param array $registration
-     * @return array|string
-     */
-    public static function signup(array $registration)
-    {
-        self::$_firebase = HelperResource::initFirebaseObject();
-        // Check user exists / Fetch user by email
-        if (HelperResource::firebaseUserByEmail($registration['email']) == true) {
-            // User with email found
-            self::$response = [
-                'errorCode' => 405,
-                'errorMessage' => 'Account with email: ' . $registration['email'] . ' already exists.'
-            ];
-        } else {
-            self::$response = self::_createUserAccount($registration);
-            HelperResource::initFirebaseObject()->getAuth()->sendEmailVerificationLink($registration['email']);
-        }
-
-        return self::$response;
-    }
-
-    /**
-     * @param array $userData
-     * @return mixed
-     */
-    protected static function _createUserAccount(array $userData)
-    {
-        self::$_firebase = HelperResource::initFirebaseObject();
-        // Create new user account
-        $newFirebaseUser = [
-            'email' => $userData['email'],
-            'emailVerified' => false,
-            'password' => $userData['password'],
-            'displayName' => $userData['first_name'] . ' ' . $userData['last_name'],
-            'disabled' => false,
-        ];
-        $newUser = self::$_firebase->getAuth()->createUser($newFirebaseUser);
-        $mysqlDatabaseUsers = [
-            'uid' => $newUser->uid,
-            'email' => $newUser->email,
-            'verification' => $newUser->emailVerified,
-            'disabled' => $newUser->disabled,
-            'created_at' => $newUser->metadata->createdAt,
-            'first_name' => $userData['first_name'],
-            'last_name' => $userData['last_name']
-        ];
-
-        $create = UserRegistrationResource::register($mysqlDatabaseUsers, Hash::make($userData['password']));
-        return $create;
-        if (isset($create['successCode'])):
-            // verify new user email address
-            self::$_firebase->getAuth()->sendEmailVerification($newUser->uid);
-            ProfileSetupResource::newProfileSetup($newUser->uid);
-            self::$response = self::login($userData['email'], $userData['password']);
-        else:
-            self::$response = $create;
-        endif;
-
-        return self::$response;
+        $filesystem = self::$fireStore->getFilesystem();
     }
 
     /**
      * @param string $email
      * @param string $password
-     * @return mixed
+     * @return array
+     * @throws AuthException
+     * @throws FirebaseException
      */
-    public static function login(string $email, string $password)
-    {
-        self::$_firebase = HelperResource::initFirebaseObject();
+    public static function fetchUserInformation(string $email, string $password): array {
         try {
-            $verify= self::$_firebase->getUserByEmail($email);
+            $verify = self::$auth->getUserByEmail($email);
             self::$response = [
                 'successCode' => 201,
                 'userInformation' => [
                     'uid' => $verify->uid,
                     'email' => $verify->email,
+                    'name' => $verify->displayName,
                     'emailVerified' => $verify->emailVerified,
+                    'avatar' => $verify->photoUrl,
                     'lastLoginAt' => $verify->metadata->lastLoginAt
                 ]
             ];
@@ -205,24 +251,62 @@ class FirebaseResource extends JsonResource
         return self::$response;
     }
 
+    /**
+     * @param $teamID
+     * @return array|mixed
+     * @throws Exception
+     */
     public static function getFlag($teamID) {
-        self::$_firebase = HelperResource::initFirebaseObject();
-        $database = self::$_firebase->getDatabase();
-        $data = $database->getReference('teams/' . $teamID)->getSnapshot();
-        $object = $data->getValue();
-        return self::cloudStorage($object['flag']);
+        try {
+            $data = self::$database->getReference('teams/' . $teamID)->getSnapshot();
+            $object = $data->getValue();
+            return self::cloudStorage($object['flag']);
+        } catch (DatabaseException $e) {
+            return ['exception' => $e->getMessage()];
+        }
     }
 
+    /**
+     * @param $url
+     * @return mixed
+     * @throws Exception
+     */
     private static function cloudStorage($url) {
-        self::$_firebase = HelperResource::initFirebaseObject();
-        // $storage = self::$_firebase->getStorage();
-        $storage = new StorageClient();
-        $bucket = $storage->bucket('gs://asn-sports.appspot.com');
-        $object = $bucket->object($url);
-        $file = $object->downloadToFile($object);
+        $object = self::$fireStore->bucket('gs://asn-sports.appspot.com')->object($url);
+        $file = self::$fireStore->downloadToFile($object);
         var_dump($file);
-        exit();
+
         $expiresAt = new \DateTime('tomorrow');
-        return $storage->bucket()->object($url)->signedURL($expiresAt);
+        return self::$fireStore->bucket()->object($url)->signedURL($expiresAt);
+    }
+
+    /**
+     * @param string $email
+     * @return bool
+     * @throws FirebaseException
+     */
+    private static function firebaseUserByEmail(string $email) {
+        try {
+            $user = self::$auth->getUserByEmail($email);
+            return (isset($user->uid)) ? true : false;
+        } catch(AuthException $e) {
+            return false;
+        }
+    }
+
+    /**
+     * @param string $uid
+     * @return bool|string
+     */
+    public static function activate(string $uid) {
+        try {
+            self::$verificationModel::where('uid', $uid)->delete();
+            self::$auth->updateUser($uid, ['emailVerified' => true]);
+            return true;
+        } catch (AuthException $e) {
+            return $e->getMessage();
+        } catch (FirebaseException $e) {
+            return $e->getMessage();
+        }
     }
 }

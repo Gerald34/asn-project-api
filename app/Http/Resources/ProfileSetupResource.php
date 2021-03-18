@@ -4,23 +4,12 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
-class ProfileSetupResource extends JsonResource
-{
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
-    public function toArray($request)
-    {
-        return parent::toArray($request);
-    }
+class ProfileSetupResource {
 
     public static function newProfileSetup(string $uid) {
         Storage::disk('profiles')->makeDirectory("{$uid}");
         self::_defaultAvatar($uid);
-        self::_defaultCoverImage($uid);
+        // self::_defaultCoverImage($uid);
     }
 
     protected static function _defaultAvatar(string $uid): void {

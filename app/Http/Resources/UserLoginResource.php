@@ -8,28 +8,22 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use App\UserLoginModel;
 use Illuminate\Support\Facades\Hash;
 
-class UserLoginResource extends JsonResource
-{
+class UserLoginResource {
+    private static UserLoginModel $userRepository;
 
-    /**
-     * @var
-     */
-    private static $response;
-
-    public function __construct($resource)
-    {
-        parent::__construct($resource);
+    public function __construct(UserLoginModel $userRepository) {
+        // parent::__construct($resource);
+        self::$userRepository = $userRepository;
     }
 
     /**
      * @param array $userData
      * @return Model|Builder|object|null
      */
-    public static function findUser(array $userData)
-    {
-        UserLoginModel::where('uid', $userData['uid'])
+    public static function findUser(array $userData) {
+        self::$userRepository::where('uid', $userData['uid'])
             ->update(['last_login' => $userData['last_login']]);
-        return UserLoginModel::select('uid')->where('uid', $userData['uid'])->first();
+        return self::$userRepository::select('uid')->where('uid', $userData['uid'])->first();
     }
 
 }

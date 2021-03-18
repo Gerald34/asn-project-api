@@ -21,7 +21,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::group(['prefix' => 'app'], function () {
     Route::post('login', 'UserLoginController@login');
     Route::post('register', 'UserRegistrationController@register');
-
+    Route::post('activate', 'UserRegistrationController@activateAccount');
+    Route::get('index', 'UserLoginController@index');
     // All middleware protected routes
     Route::group(['middleware' => ['jwt.verify']], function ($router) {
 

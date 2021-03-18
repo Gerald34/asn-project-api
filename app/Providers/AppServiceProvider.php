@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Resources\UserRegistrationResource;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        // $this->app->register(UserRegistrationResource::class);
+        // $this->app->register(HelperResource::class);
+        // $this->app->register(Database::class);
+        // $this->app->bind((HelperResource::class, FirebaseResource::class);
     }
 }

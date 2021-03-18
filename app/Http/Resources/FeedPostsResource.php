@@ -3,42 +3,42 @@
 namespace App\Http\Resources;
 
 use App\FeedPostsModel;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Http\Resources\FirebaseResource as Firebase;
 use Illuminate\Http\Request;
+use Kreait\Firebase\Exception\DatabaseException;
 
-class FeedPostsResource extends JsonResource
-{
-    private static $response;
+class FeedPostsResource extends JsonResource {
+    private static array $response;
 
     /**
      * Fetch user feed object
      * @param $uid
      * @return array
      */
-    public static function fetchPosts($uid)
-    {
+    public static function fetchPosts(string $uid) {
         $feedData = [];
-        // Fetch user feed posts
-        $posters = DB::table('posts')->select('uid', 'post_id')->where('uid', $uid)->get();
-        // Get each user id
+        $posters = DB::table('posts')
+            ->select('uid', 'post_id')
+            ->where('uid', $uid)
+            ->get();
         foreach ($posters as $poster) {
             $postInformation = [
                 // 'avatar' => self::_getUserAvatar($poster->uid),
                 'feedData' => self::_getFeedPosts($poster->post_id),
                 'userInformation' => self::_getUserInformation($poster->uid)
             ];
-            // Feed object push
             $feedData[] = $postInformation;
         }
 
         if (empty($feedData)):
-            // Return empty
             self::$response = ['response' => 204];
         else:
-            // Return successful
             self::$response = ['response' => 200, 'data' => $feedData];
         endif;
         return self::$response;
@@ -46,10 +46,9 @@ class FeedPostsResource extends JsonResource
 
     /**
      * @param $uid
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Query\Builder|object|null
+     * @return Model|Builder|object|null
      */
-    private static function _getUserAvatar($uid)
-    {
+    private static function _getUserAvatar(string $uid) {
         return DB::table('avatars')->select('avatar')->where('uid', $uid)->first();
     }
 
@@ -59,11 +58,10 @@ class FeedPostsResource extends JsonResource
      * @param $uid
      * @return array
      */
-    private static function _getFeedPosts($uid)
-    {
+    private static function _getFeedPosts(string $uid) {
         $posts = DB::table('posts')->where('post_id', $uid)->first();
-        // $feedObject = [];
-        $feedObject = [
+
+        return [
             'feed' => $posts,
             'likes' => [
                 'count' => count(self::_getPostLikes($posts->post_id)),
@@ -71,18 +69,15 @@ class FeedPostsResource extends JsonResource
             ],
             'comments' => self::_getPostComments($posts->post_id)
         ];
-
-        return $feedObject;
     }
 
     /**
      * Get user post like by post id
      *
      * @param $postID
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
-    public static function _getPostLikes($postID)
-    {
+    public static function _getPostLikes(string $postID) {
         return DB::table('post_likes')->where('post_id', $postID)->get();
     }
 
@@ -97,16 +92,16 @@ class FeedPostsResource extends JsonResource
     /**
      * Get post user information by $uid
      * @param $uid
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Query\Builder|object|null
+     * @return Model|Builder|object|null
      */
-    private static function _getUserInformation($uid)
+    private static function _getUserInformation(string $uid)
     {
         return DB::table('users')->select('uid', 'first_name', 'last_name')->where('uid', $uid)->first();
     }
 
     /**
      * @param array $data
-     * @param Request $request
+     * @throws DatabaseException
      */
     public static function postStatusUpdate(array $data)
     {

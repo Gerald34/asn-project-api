@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Kreait\Firebase\Exception\DatabaseException;
 use Spatie\LaravelImageOptimizer\Facades\ImageOptimizer;
 
 /**
@@ -18,6 +19,11 @@ use Spatie\LaravelImageOptimizer\Facades\ImageOptimizer;
  */
 class FeedPostsController extends Controller {
     private object $response;
+    private FeedPostsResource $feedPostsResource;
+
+    public function __construct(FeedPostsResource $feedPostsResource) {
+        $this->feedPostsResource = $feedPostsResource;
+    }
 
     /**
      * @param $uid
@@ -25,7 +31,7 @@ class FeedPostsController extends Controller {
      */
     public function getUserPosts($uid)
     {
-        return FeedPostsResource::fetchPosts($uid);
+        return $this->feedPostsResource::fetchPosts($uid);
     }
 
     /**
@@ -33,7 +39,6 @@ class FeedPostsController extends Controller {
      * @param $post_id
      * @param $imageName
      * @return \Illuminate\Http\Response
-     *
      */
     public function getPostImage($uid, $post_id,  $imageName): object {
         $path = storage_path('app/posts/' . $uid . '/' . $post_id . '/' . $imageName);
@@ -49,12 +54,13 @@ class FeedPostsController extends Controller {
     /**
      * @param Request $request
      * @return array
+     * @throws DatabaseException
      */
     public function postUserPosts(Request $request)
     {
         $uid = $request->input('uid');
         $message = $request->input('message');
-        $postID = FeedPostsResource::_generateRandomString();
+        $postID = $this->feedPostsResource::_generateRandomString();
 
         if ($request->hasFile('images') === true) {
             $files[] = $request->file('images');
@@ -77,7 +83,8 @@ class FeedPostsController extends Controller {
                 // ImageOptimizer::optimize($fileNameToStore);
 
                 // upload File to external server
-                Storage::disk('posts')->put($uid . '/' . $postID . '/' . $fileNameToStore, fopen($file, 'r+'));
+                Storage::disk('posts')
+                    ->put($uid . '/' . $postID . '/' . $fileNameToStore, fopen($file, 'r+'));
                 $images[] = $fileNameToStore;
             }
 
@@ -90,7 +97,7 @@ class FeedPostsController extends Controller {
                 'updated_at' => Carbon::now()
             ];
 
-            $this->response = FeedPostsResource::postStatusUpdate($postData);
+            $this->response = $this->feedPostsResource::postStatusUpdate($postData);
         } else {
             // FeedPostsResource::postStatusUpdate($uid, $message, null);
         }

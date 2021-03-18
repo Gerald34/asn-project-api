@@ -7,6 +7,7 @@
     "require": {
         "php": "^7.4.1",
         "ext-json": "*",
+        "ahsankhatri/firestore-php": "^2.0",
         "beyondcode/laravel-websockets": "^1.4",
         "cboden/ratchet": "^0.4.2",
         "fideloper/proxy": "^4.0",
@@ -19,12 +20,14 @@
         "laravel/tinker": "^2.0",
         "laravel/ui": "^2.4",
         "nesbot/carbon": "^2.39.1",
+        "phpmailer/phpmailer": "^6.2",
         "spatie/laravel-image-optimizer": "^1.5",
+        "swiftmailer/swiftmailer": "^6.2",
         "tymon/jwt-auth": "^1.0"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",
-        "filp/whoops": "^2.0",
+        "filp/whoops": "^2.9",
         "fzaninotto/faker": "^1.4",
         "mockery/mockery": "^1.0",
         "nunomaduro/collision": "^4.0",

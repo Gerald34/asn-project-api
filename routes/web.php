@@ -20,3 +20,7 @@ Route::get('/', function () {
 Route::get('developer', function() {
     return view('login');
 });
+
+Route::get('email', function() {
+    return view('verification');
+});
